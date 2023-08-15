@@ -3,6 +3,7 @@
 3) Clone WarpedGANSpace from https://github.com/chi0tzp/WarpedGANSpace into the folder "WarpedGANSpace"
 3) a) In lib/__init__ and lib/trainer rename imports from .aux to ._aux to link to the correct file
 3) b) Run python download_models.py to download pretrained models
+3) c) Overwrite files in WarpedGANSpace with those in the folder overwrite
 
 
 What to set for GPUs:
