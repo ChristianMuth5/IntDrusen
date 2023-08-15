@@ -1,0 +1,24 @@
+
+# Generate an image using pre-trained AFHQv2 model ("Ours" in Figure 1, left).
+
+python gen_images.py --outdir=out --trunc=1 --seeds=5345 --network=https://api.ngc.nvidia.com/v2/models/nvidia/research/stylegan3/versions/1/files/stylegan3-r-afhqv2-512x512.pkl
+
+
+# Render a 4x2 grid of interpolations for seeds 0 through 31.
+
+python gen_video.py --output=lerp.mp4 --trunc=1 --seeds=0-31 --grid=4x2 --network=https://api.ngc.nvidia.com/v2/models/nvidia/research/stylegan3/versions/1/files/stylegan3-r-afhqv2-512x512.pkl
+
+Convert dataset:
+python dataset_tool.py --source=../Duke_drusen_128_5_ffdnet --dest=../Duke_drusen_128_5_ffdnet.zip
+
+Train:
+python train.py --outdir=~/training-runs --data=../Duke_drusen_128_5_ffdnet_stylegan.zip --mirror=1 --kimg=1000 --cfg=stylegan3-r --gpus=1 --batch=32 --gamma=0.5 --batch-gpu=32 --snap=20 --cmax=20
+
+python gen_images.py --outdir=out --trunc=1 --seeds=2 --network=~/training-runs/00001-stylegan3-t-Duke_drusen_128_5_ffdnet_stylegan-gpus1-batch32-gamma8.2/network-snapshot-001200.pkl
+
+# --stylegan2-resolution for StyleGAN3
+python train.py --gan-type=GAN128 --reconstructor-type=LeNet --learn-gammas --num-support-sets=10 --num-support-dipoles=5 --min-shift-magnitude=0.15 --max-shift-magnitude=0.25 --batch-size=8 --max-iter=10000
+
+python sample_gan.py --gan-type=GAN128 --num-samples=4
+
+python traverse_latent_space.py --exp=experiments/complete/GAN128-LeNet-K10-D5-LearnGammas-eps0.15_0.25 --pool=GAN128_7
