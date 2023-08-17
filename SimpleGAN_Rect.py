@@ -8,47 +8,36 @@ def get_generator(nz):
     device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
     nc = 1
 
-    class GeneratorComplex(nn.Module):
+    class Generator(nn.Module):
         def __init__(self, ngpu):
-            super(GeneratorComplex, self).__init__()
+            super(Generator, self).__init__()
             self.ngpu = ngpu
+            self.dim_z = nz
             self.main = nn.Sequential(
                 # input is Z, going into a convolution
                 nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
                 nn.BatchNorm2d(ngf * 8),
                 nn.ReLU(True),
                 # state size. (ngf*8) x 4 x 4
-                nn.ConvTranspose2d(ngf * 8, ngf * 4, 4, 2, 1, bias=False),
+                nn.ConvTranspose2d(ngf * 8, ngf * 4, (3, 4), (1, 2), 1, bias=False),
                 nn.BatchNorm2d(ngf * 4),
                 nn.ReLU(True),
-                # state size. (ngf*4) x 8 x 8
-                nn.ConvTranspose2d(ngf * 4, ngf * 4, 4, 1, 1, bias=False),  # 4,1,1 makes it keep the size
-                nn.BatchNorm2d(ngf * 4),
-                nn.ReLU(True),
-                # state size. (ngf*4) x 8 x 8
+                # state size. (ngf*4) x 4 x 8
                 nn.ConvTranspose2d(ngf * 4, ngf * 4, 4, 2, 1, bias=False),
                 nn.BatchNorm2d(ngf * 4),
                 nn.ReLU(True),
-                # state size. (ngf*4) x 16 x 16
-                nn.ConvTranspose2d(ngf * 4, ngf * 4, 4, 1, 1, bias=False),
-                nn.BatchNorm2d(ngf * 4),
-                nn.ReLU(True),
-                # state size. (ngf*4) x 16 x 16
+                # state size. (ngf*4) x 8 x 16
                 nn.ConvTranspose2d(ngf * 4, ngf * 2, 4, 2, 1, bias=False),
                 nn.BatchNorm2d(ngf * 2),
                 nn.ReLU(True),
-                # state size. (ngf*2) x 32 x 32
-                nn.ConvTranspose2d(ngf * 2, ngf * 2, 4, 1, 1, bias=False),
-                nn.BatchNorm2d(ngf * 2),
-                nn.ReLU(True),
-                # state size. (ngf*2) x 32 x 32
+                # state size. (ngf*2) x 16 x 32
                 nn.ConvTranspose2d(ngf * 2, ngf, 4, 2, 1, bias=False),
                 nn.BatchNorm2d(ngf),
                 nn.ReLU(True),
-                # state size. (ngf) x 64 x 64
+                # state size. (ngf) x 32 x 64
                 nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False),
                 nn.Tanh()
-                # state size. (nc) x 128 x 128
+                # state size. (nc) x 64 x 128
             )
 
         def forward(self, z, shift=None):
@@ -61,9 +50,14 @@ def get_generator(nz):
                 out = out.unsqueeze_(2)
                 out = out.unsqueeze_(3)
 
+            #print("G")
+            #print(out.shape)
+            #out = self.main(out)
+            #print(out.shape)
+            #return out
             return self.main(out)
 
-    return GeneratorComplex(ngpu).to(device)
+    return Generator(ngpu).to(device)
 
 
 def get_discriminator():
@@ -72,32 +66,32 @@ def get_discriminator():
     device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
     nc = 1
 
-    class DiscriminatorComplex(nn.Module):
+    class Discriminator(nn.Module):
         def __init__(self, ngpu):
-            super(DiscriminatorComplex, self).__init__()
+            super(Discriminator, self).__init__()
             self.ngpu = ngpu
             self.main = nn.Sequential(
-                # input is (nc) x 128 x 128
+                # input is (nc) x 64 x 128
                 nn.Conv2d(nc, ndf, 4, 2, 1, bias=False),
                 nn.LeakyReLU(0.2, inplace=True),
-                # state size. (ndf) x 64 x 64
+                # state size. (ndf) x 32 x 64
                 nn.Conv2d(ndf, ndf * 2, 4, 2, 1, bias=False),
                 nn.BatchNorm2d(ndf * 2),
                 nn.LeakyReLU(0.2, inplace=True),
-                # state size. (ndf*2) x 32 x 32
+                # state size. (ndf*2) x 16 x 32
                 nn.Conv2d(ndf * 2, ndf * 2, 4, 2, 1, bias=False),
                 nn.BatchNorm2d(ndf * 2),
                 nn.LeakyReLU(0.2, inplace=True),
-                # state size. (ndf*4) x 16 x 16
+                # state size. (ndf*4) x 8 x 16
                 nn.Conv2d(ndf * 2, ndf * 4, 4, 2, 1, bias=False),
                 nn.BatchNorm2d(ndf * 4),
                 nn.LeakyReLU(0.2, inplace=True),
-                # state size. (ndf*4) x 16 x 16
-                nn.Conv2d(ndf * 4, ndf * 4, 3, 1, 1, bias=False),
+                # state size. (ndf*4) x 4 x 8
+                nn.Conv2d(ndf * 4, ndf * 4, 3, 1, 1, bias=False),  # 3 1 1 makes it keep the size
                 nn.BatchNorm2d(ndf * 4),
                 nn.LeakyReLU(0.2, inplace=True),
-                # state size. (ndf*4) x 8 x 8
-                nn.Conv2d(ndf * 4, ndf * 8, 4, 2, 1, bias=False),
+                # state size. (ndf*4) x 4 x 8
+                nn.Conv2d(ndf * 4, ndf * 8, (3, 4), (1, 2), 1, bias=False),
                 nn.BatchNorm2d(ndf * 8),
                 nn.LeakyReLU(0.2, inplace=True),
                 # state size. (ndf*8) x 4 x 4
@@ -105,7 +99,19 @@ def get_discriminator():
                 nn.Sigmoid()
             )
 
+        """
+        torch.Size([32, 1, 64, 128])
+        torch.Size([32, 1, 1, 1])
+        torch.Size([32, 1, 80, 128])
+        torch.Size([32, 1, 2, 1])
+        """
+
         def forward(self, input):
+            #print("D")
+            #print(input.shape)
+            #out = self.main(input)
+            #print(out.shape)
+            #return out
             return self.main(input)
 
-    return DiscriminatorComplex(ngpu).to(device)
+    return Discriminator(ngpu).to(device)

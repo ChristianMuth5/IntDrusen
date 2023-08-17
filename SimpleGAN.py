@@ -50,8 +50,12 @@ def get_generator(nz):
                 out = out.unsqueeze_(2)
                 out = out.unsqueeze_(3)
 
-            out = self.main(out)
-            return out
+            #print("G")
+            #print(out.shape)
+            #out = self.main(out)
+            #print(out.shape)
+            #return out
+            return self.main(out)
 
     return Generator(ngpu).to(device)
 
@@ -96,6 +100,20 @@ def get_discriminator():
             )
 
         def forward(self, input):
+            #print("D")
+            #print(input.shape)
+            #out = self.main(input)
+            #print(out.shape)
+            #return out
             return self.main(input)
 
     return Discriminator(ngpu).to(device)
+
+    """
+    D
+    torch.Size([32, 1, 128, 128])
+    torch.Size([32, 1, 1, 1])
+    G
+    torch.Size([32, 20, 1, 1])
+    torch.Size([32, 1, 128, 128])
+    """

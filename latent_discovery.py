@@ -28,6 +28,11 @@ from torchvision.transforms import ToPILImage
 from torchvision.utils import make_grid
 from tqdm import tqdm, tqdm_notebook
 import subprocess
+import matplotlib.image as mpimg
+from matplotlib.animation import FuncAnimation
+import multiprocessing as mp
+import glob
+from functools import partial
 
 
 def find_latent_linear(run, G, out_dir, logger: logging.Logger):
@@ -1050,8 +1055,53 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
     return
 
 
-def create_path_imgs():
-    return
+def show_one_path(data):
+    folder = data[0]
+    path_i = data[1]
+    drusen = data[2]
+    fig, axes = plt.subplots(5, 10, figsize=(20, 10))
+
+    def animation_function(path_image_i):
+        for i in range(len(drusen)):
+            plt_col = i % 10
+            plt_row = 0 if i < 10 else 3
+
+            # original druse
+            druse = glob.glob(os.path.join(drusen[i], "original_image.jpg"))[0]
+            image = mpimg.imread(druse)
+            ax = axes[plt_row][plt_col]
+            ax.imshow(image, cmap='gray')
+            ax.axis('off')
+
+            # path image
+            druse_path = sorted(glob.glob(os.path.join(drusen[i], "paths_images", f"path_{path_i:03d}", "*.jpg")))[path_image_i]
+            image = mpimg.imread(druse_path)
+            ax = axes[plt_row + 1][plt_col]
+            ax.imshow(image, cmap='gray')
+            ax.axis('off')
+        # remove center line
+        for i in range(10):
+            ax = axes[2][i]
+            ax.axis('off')
+
+    anim_created = FuncAnimation(fig, animation_function, frames=33, interval=125)
+    plt.tight_layout()
+    anim_created.save(os.path.join(folder, f"Overview_{path_i:03d}.gif"), writer='imagemagick', fps=8)
+
+
+def show_paths(folder):
+    data = [(folder, b, []) for b in range(10)]
+    for i in range(len(data)):
+        temp = glob.glob(os.path.join(folder, "experiments", "complete", "*", "results", "*", "*"))
+        drusen = sorted([os.path.join(temp[0], x) for x in glob.glob1(temp[0], "*")])
+        for druse in drusen:
+            data[i][2].append(druse)
+
+    pool = mp.Pool(mp.cpu_count())
+    partial_process_item = partial(show_one_path)
+    pool.map(partial_process_item, data)
+    pool.close()
+    pool.join()
 
 
 def find_latent_warp(run, out_dir, model_folder, logger: logging.Logger):
@@ -1101,7 +1151,7 @@ def find_latent_warp(run, out_dir, model_folder, logger: logging.Logger):
     logger.info("Finished discovering directions")
 
     # Create sample images
-    num_samples = 2
+    num_samples = 20
     cmd = ["python",
            os.path.join(warp_folder, "sample_gan.py"),
            f"--gan-type={gan_type}",
@@ -1129,7 +1179,8 @@ def find_latent_warp(run, out_dir, model_folder, logger: logging.Logger):
     logger.info("Finished moving data")
 
     # Create better plots
-    logger.info("Finished creating better plots")
+    show_paths(out_dir)
+    logger.info("Finished creating plots")
 
 
 # Find latent directions in G

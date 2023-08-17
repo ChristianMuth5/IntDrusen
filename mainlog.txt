@@ -1683,3 +1683,463 @@
 2023-08-15 11:24:12,797 - INFO - Run: {'dataset': {'data_source': 'Duke', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 100}, 'random_seed': -1}
 2023-08-15 11:26:18,562 - INFO - Run: {'dataset': {'data_source': 'Duke', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 100}, 'random_seed': -1}
 2023-08-15 11:29:17,766 - INFO - Run: {'dataset': {'data_source': 'Duke', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 100}, 'random_seed': -1}
+2023-08-15 15:42:19,470 - INFO - Run: {'dataset': {'data_source': 'Duke', 'method': 'BiM', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 100}, 'random_seed': -1}
+2023-08-15 15:42:19,470 - INFO - Need to generate drusen first
+2023-08-15 15:42:20,176 - INFO - Finished generating drusen
+2023-08-15 15:42:20,177 - INFO - Start generating data of size 128 with method BiM and remove below line
+2023-08-15 15:42:20,628 - INFO - Start training on Data/Duke_128_5_RBL_bim with GAN for 10 epochs
+2023-08-15 15:44:01,929 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'BiM', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 100}, 'random_seed': -1}
+2023-08-15 15:44:01,929 - INFO - Need to generate drusen first
+2023-08-15 15:44:02,404 - INFO - Finished generating drusen
+2023-08-15 15:44:02,404 - INFO - Start generating data of size 128 with method BiM and remove below line
+2023-08-15 15:44:03,227 - INFO - Start training on Data/Bonn_128_5_RBL_bim with GAN for 10 epochs
+2023-08-15 15:47:03,996 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'BiM', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 100}, 'random_seed': -1}
+2023-08-15 15:47:03,996 - INFO - Need to generate drusen first
+2023-08-15 15:47:04,452 - INFO - Finished generating drusen
+2023-08-15 15:47:04,452 - INFO - Start generating data of size 128 with method BiM and remove below line
+2023-08-15 15:47:05,000 - INFO - Start training on Data/Bonn_128_5_RBL_bim with GAN for 10 epochs
+2023-08-15 15:49:17,299 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'BiM', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 100}, 'random_seed': -1}
+2023-08-15 15:49:17,299 - INFO - Need to generate drusen first
+2023-08-15 15:49:25,290 - INFO - Finished generating drusen
+2023-08-15 15:49:25,290 - INFO - Start generating data of size 128 with method BiM and remove below line
+2023-08-15 15:49:26,262 - INFO - Start training on Data/Bonn_128_5_RBL_bim with GAN for 10 epochs
+2023-08-15 15:51:34,598 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'BiM', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 100}, 'random_seed': -1}
+2023-08-15 15:51:34,599 - INFO - Need to generate drusen first
+2023-08-15 15:52:21,224 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'BiM', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 100}, 'random_seed': -1}
+2023-08-15 15:52:21,224 - INFO - Need to generate drusen first
+2023-08-15 15:53:40,954 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'BiM', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 100}, 'random_seed': -1}
+2023-08-15 15:53:40,954 - INFO - Need to generate drusen first
+2023-08-15 15:53:49,571 - INFO - Finished generating drusen
+2023-08-15 15:53:49,571 - INFO - Start generating data of size 128 with method BiM and remove below line
+2023-08-15 15:53:50,743 - INFO - Start training on Data/Bonn_128_5_RBL_bim with GAN for 10 epochs
+2023-08-15 15:57:45,284 - INFO - Finished training
+2023-08-15 15:57:45,285 - INFO - Start discovering directions for Data/Bonn_128_5_RBL_bim_aug_bce_results_GAN_10epochs_20nz_warp100 with method warp, for 100 steps.
+2023-08-15 15:58:16,214 - INFO - Finished discovering directions
+2023-08-15 15:58:24,159 - INFO - Finished creating samples
+2023-08-15 15:58:27,173 - INFO - Finished showing paths
+2023-08-15 15:58:27,174 - INFO - Finished moving data
+2023-08-15 15:58:27,174 - INFO - Finished creating better plots
+2023-08-15 15:58:27,174 - INFO - Finished discovering directions
+2023-08-15 15:58:27,175 - INFO - Encountered early stop
+2023-08-15 15:58:27,175 - INFO - Finished
+2023-08-15 16:13:42,516 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'BiM', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 100}, 'random_seed': -1}
+2023-08-15 16:13:42,516 - INFO - Data already exists
+2023-08-15 16:13:42,516 - INFO - Start generating data of size 128 with method BiM and remove below line
+2023-08-15 16:13:44,062 - INFO - Start training on Data/Bonn_128_5_RBL_bim with GAN for 10 epochs
+2023-08-15 16:13:44,062 - INFO - Already trained with these settings
+2023-08-15 16:13:47,639 - INFO - Start discovering directions for Data/Bonn_128_5_RBL_bim_aug_bce_results_GAN_10epochs_20nz_warp100 with method warp, for 100 steps.
+2023-08-15 16:14:24,797 - INFO - Finished discovering directions
+2023-08-15 16:14:35,816 - INFO - Finished creating samples
+2023-08-15 16:14:40,454 - INFO - Finished showing paths
+2023-08-15 16:14:40,454 - INFO - Finished moving data
+2023-08-15 16:14:40,455 - INFO - Finished creating better plots
+2023-08-15 16:14:40,455 - INFO - Finished discovering directions
+2023-08-15 16:14:40,455 - INFO - Encountered early stop
+2023-08-15 16:14:40,455 - INFO - Finished
+2023-08-15 16:16:18,260 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-15 16:16:18,261 - INFO - Data already exists
+2023-08-15 16:16:18,261 - INFO - Start generating data of size 128 with method noise and remove below line
+2023-08-15 16:17:53,918 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-15 16:17:53,918 - INFO - Data already exists
+2023-08-15 16:17:53,918 - INFO - Start generating data of size 128 with method noise and remove below line
+2023-08-15 16:18:32,494 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-15 16:18:32,494 - INFO - Data already exists
+2023-08-15 16:18:32,591 - INFO - Start training on Data/Bonn_128_5_RBL with GAN for 10 epochs
+2023-08-15 16:23:07,349 - INFO - Finished training
+2023-08-15 16:23:07,350 - INFO - Start discovering directions for Data/Bonn_128_5_RBL_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-15 16:23:45,154 - INFO - Finished discovering directions
+2023-08-15 16:23:53,611 - INFO - Finished creating samples
+2023-08-15 16:23:57,513 - INFO - Finished showing paths
+2023-08-15 16:23:57,514 - INFO - Finished moving data
+2023-08-15 16:23:57,514 - INFO - Finished creating better plots
+2023-08-15 16:23:57,514 - INFO - Finished discovering directions
+2023-08-15 16:23:57,514 - INFO - Encountered early stop
+2023-08-15 16:23:57,514 - INFO - Finished
+2023-08-15 16:28:11,932 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-15 16:28:11,933 - INFO - Data already exists
+2023-08-15 16:28:11,952 - INFO - Start training on Data/Bonn_128_5_RBL with GAN for 10 epochs
+2023-08-15 16:28:11,952 - INFO - Already trained with these settings
+2023-08-15 16:28:15,374 - INFO - Start discovering directions for Data/Bonn_128_5_RBL_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-15 16:28:15,374 - INFO - Already discovered directions
+2023-08-15 16:28:15,374 - INFO - Finished discovering directions
+2023-08-15 16:28:15,374 - INFO - Encountered early stop
+2023-08-15 16:28:15,374 - INFO - Finished
+2023-08-15 16:28:30,946 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-15 16:28:30,946 - INFO - Data already exists
+2023-08-15 16:28:30,983 - INFO - Start training on Data/Bonn_128_5_RBL with GAN for 10 epochs
+2023-08-15 16:28:30,983 - INFO - Already trained with these settings
+2023-08-15 16:28:35,151 - INFO - Start discovering directions for Data/Bonn_128_5_RBL_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-15 16:28:41,887 - INFO - Finished discovering directions
+2023-08-15 16:28:49,478 - INFO - Finished creating samples
+2023-08-15 16:28:53,256 - INFO - Finished showing paths
+2023-08-15 16:28:53,258 - INFO - Finished moving data
+2023-08-15 16:28:53,258 - INFO - Finished creating better plots
+2023-08-15 16:28:53,258 - INFO - Finished discovering directions
+2023-08-15 16:28:53,258 - INFO - Encountered early stop
+2023-08-15 16:28:53,258 - INFO - Finished
+2023-08-15 16:33:43,278 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-15 16:33:43,278 - INFO - Data already exists
+2023-08-15 16:33:43,297 - INFO - Start training on Data/Bonn_128_5_RBL with GAN for 10 epochs
+2023-08-15 16:33:43,297 - INFO - Already trained with these settings
+2023-08-15 16:33:46,552 - INFO - Start discovering directions for Data/Bonn_128_5_RBL_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-15 16:34:15,280 - INFO - Finished discovering directions
+2023-08-15 16:34:22,911 - INFO - Finished creating samples
+2023-08-15 16:34:25,914 - INFO - Finished showing paths
+2023-08-15 16:34:25,915 - INFO - Finished moving data
+2023-08-15 16:34:25,915 - INFO - Finished creating better plots
+2023-08-15 16:34:25,916 - INFO - Finished discovering directions
+2023-08-15 16:34:25,916 - INFO - Encountered early stop
+2023-08-15 16:34:25,916 - INFO - Finished
+2023-08-15 16:35:14,525 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-15 16:35:14,525 - INFO - Data already exists
+2023-08-15 16:35:14,553 - INFO - Start training on Data/Bonn_128_5_RBL with GAN for 10 epochs
+2023-08-15 16:35:14,553 - INFO - Already trained with these settings
+2023-08-15 16:35:18,581 - INFO - Start discovering directions for Data/Bonn_128_5_RBL_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-15 16:35:58,394 - INFO - Finished discovering directions
+2023-08-15 16:36:04,745 - INFO - Finished creating samples
+2023-08-15 16:36:08,145 - INFO - Finished showing paths
+2023-08-15 16:36:08,146 - INFO - Finished moving data
+2023-08-15 16:36:08,146 - INFO - Finished creating better plots
+2023-08-15 16:36:08,146 - INFO - Finished discovering directions
+2023-08-15 16:36:08,146 - INFO - Encountered early stop
+2023-08-15 16:36:08,147 - INFO - Finished
+2023-08-15 16:43:22,771 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-15 16:43:22,771 - INFO - Data already exists
+2023-08-15 16:43:22,792 - INFO - Start training on Data/Bonn_128_5_RBL with GAN for 10 epochs
+2023-08-15 16:43:22,792 - INFO - Already trained with these settings
+2023-08-15 16:43:25,784 - INFO - Start discovering directions for Data/Bonn_128_5_RBL_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-15 16:44:02,295 - INFO - Finished discovering directions
+2023-08-15 16:44:08,819 - INFO - Finished creating samples
+2023-08-15 16:44:11,751 - INFO - Finished showing paths
+2023-08-15 16:44:11,752 - INFO - Finished moving data
+2023-08-15 16:44:11,752 - INFO - Finished creating better plots
+2023-08-15 16:44:11,752 - INFO - Finished discovering directions
+2023-08-15 16:44:11,752 - INFO - Encountered early stop
+2023-08-15 16:44:11,752 - INFO - Finished
+2023-08-15 16:46:53,907 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-15 16:46:53,908 - INFO - Data already exists
+2023-08-15 16:46:53,926 - INFO - Start training on Data/Bonn_128_5_RBL with GAN for 10 epochs
+2023-08-15 16:46:53,926 - INFO - Already trained with these settings
+2023-08-15 16:46:57,234 - INFO - Start discovering directions for Data/Bonn_128_5_RBL_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-15 16:47:04,239 - INFO - Finished discovering directions
+2023-08-15 16:47:11,001 - INFO - Finished creating samples
+2023-08-15 16:47:15,097 - INFO - Finished showing paths
+2023-08-15 16:47:15,097 - INFO - Finished moving data
+2023-08-15 16:47:15,097 - INFO - Finished creating better plots
+2023-08-15 16:47:15,098 - INFO - Finished discovering directions
+2023-08-15 16:47:15,098 - INFO - Encountered early stop
+2023-08-15 16:47:15,098 - INFO - Finished
+2023-08-15 16:55:40,471 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-15 16:55:40,471 - INFO - Data already exists
+2023-08-15 16:55:40,489 - INFO - Start training on Data/Bonn_128_5_RBL with GAN for 10 epochs
+2023-08-15 16:55:40,489 - INFO - Already trained with these settings
+2023-08-15 16:55:42,117 - INFO - Start discovering directions for Data/Bonn_128_5_RBL_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-15 16:56:12,635 - INFO - Finished discovering directions
+2023-08-15 16:56:20,784 - INFO - Finished creating samples
+2023-08-15 16:56:29,313 - INFO - Finished showing paths
+2023-08-15 16:56:29,314 - INFO - Finished moving data
+2023-08-15 16:56:29,314 - INFO - Finished creating better plots
+2023-08-15 16:56:29,314 - INFO - Finished discovering directions
+2023-08-15 16:56:29,315 - INFO - Encountered early stop
+2023-08-15 16:56:29,315 - INFO - Finished
+2023-08-15 17:05:00,679 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-15 17:05:00,679 - INFO - Data already exists
+2023-08-15 17:05:00,752 - INFO - Start training on Data/Bonn_128_5_RBL with GAN for 200 epochs
+2023-08-15 17:06:19,631 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-15 17:06:19,631 - INFO - Data already exists
+2023-08-15 17:06:19,668 - INFO - Start training on Data/Bonn_128_5_RBL with GAN for 200 epochs
+2023-08-15 17:08:50,611 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-15 17:08:50,611 - INFO - Data already exists
+2023-08-15 17:08:50,651 - INFO - Start training on Data/Bonn_128_5_RBL with GAN for 200 epochs
+2023-08-15 17:10:02,243 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-15 17:10:02,243 - INFO - Data already exists
+2023-08-15 17:10:02,288 - INFO - Start training on Data/Bonn_128_5_RBL with GAN for 10 epochs
+2023-08-15 17:13:37,232 - INFO - Finished training
+2023-08-15 17:13:37,233 - INFO - Start discovering directions for Data/Bonn_128_5_RBL_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-15 17:14:06,876 - INFO - Finished discovering directions
+2023-08-15 17:14:14,359 - INFO - Finished creating samples
+2023-08-15 17:14:34,582 - INFO - Finished showing paths
+2023-08-15 17:14:34,583 - INFO - Finished moving data
+2023-08-15 17:14:34,583 - INFO - Finished creating better plots
+2023-08-15 17:14:34,584 - INFO - Finished discovering directions
+2023-08-15 17:14:34,584 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-15 17:14:34,584 - INFO - Data already exists
+2023-08-15 17:14:34,587 - INFO - Start training on Data/Bonn_128_5_RBL with GAN for 200 epochs
+2023-08-15 18:27:43,416 - INFO - Finished training
+2023-08-15 18:27:43,416 - INFO - Start discovering directions for Data/Bonn_128_5_RBL_aug_bce_results_GAN_200epochs_20nz_warp200000 with method warp, for 200000 steps.
+2023-08-15 20:44:10,931 - INFO - Finished discovering directions
+2023-08-15 20:44:20,364 - INFO - Finished creating samples
+2023-08-15 20:44:41,025 - INFO - Finished showing paths
+2023-08-15 20:44:41,026 - INFO - Finished moving data
+2023-08-15 20:44:41,026 - INFO - Finished creating better plots
+2023-08-15 20:44:41,026 - INFO - Finished discovering directions
+2023-08-15 20:44:41,027 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'BiM', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-15 20:44:41,027 - INFO - Data already exists
+2023-08-15 20:44:41,030 - INFO - Start training on Data/Bonn_128_5_RBL_bim with GAN for 200 epochs
+2023-08-15 21:58:22,951 - INFO - Finished training
+2023-08-15 21:58:22,953 - INFO - Start discovering directions for Data/Bonn_128_5_RBL_bim_aug_bce_results_GAN_200epochs_20nz_warp200000 with method warp, for 200000 steps.
+2023-08-15 23:58:50,988 - INFO - Finished discovering directions
+2023-08-15 23:58:58,389 - INFO - Finished creating samples
+2023-08-15 23:59:17,571 - INFO - Finished showing paths
+2023-08-15 23:59:17,572 - INFO - Finished moving data
+2023-08-15 23:59:17,572 - INFO - Finished creating better plots
+2023-08-15 23:59:17,572 - INFO - Finished discovering directions
+2023-08-15 23:59:17,573 - INFO - Encountered early stop
+2023-08-15 23:59:17,573 - INFO - Finished
+2023-08-16 13:50:34,593 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 16:26:09,297 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-16 16:26:09,297 - INFO - Start generating data of size 128 with method noise and remove below line
+2023-08-16 16:38:05,317 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 16:40:37,392 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 16:41:54,395 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 16:45:08,061 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 16:48:09,133 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 16:48:47,019 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 16:53:26,677 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:01:49,078 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:02:19,646 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:02:39,624 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:08:50,560 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:09:21,216 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:10:11,891 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:11:45,240 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:12:36,096 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:15:41,799 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:16:42,928 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:17:50,038 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:19:30,662 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:20:19,099 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:21:14,295 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:21:52,003 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:22:27,141 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:24:51,845 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:50:14,230 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:50:41,912 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 17:55:56,888 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 18:03:55,403 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-16 18:03:55,403 - INFO - Data already exists
+2023-08-16 18:04:48,510 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-16 18:04:48,510 - INFO - Data already exists
+2023-08-16 18:08:27,195 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-16 18:08:27,195 - INFO - Start generating data of size 128 with method noise and remove below line
+2023-08-16 18:08:57,253 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-16 18:08:57,253 - INFO - Start generating data of size 128 with method noise and remove below line
+2023-08-16 18:13:32,404 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-16 18:13:32,404 - INFO - Start generating data of size 128 with method noise and remove below line
+2023-08-16 18:16:06,605 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-16 18:16:06,605 - INFO - Start generating data of size 128 with method noise and remove below line
+2023-08-16 18:18:42,043 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-16 18:18:42,043 - INFO - Start generating data of size 128 with method noise and remove below line
+2023-08-16 18:22:36,318 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-16 18:22:36,318 - INFO - Start generating data of size 128 with method noise and remove below line
+2023-08-16 18:24:00,837 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-16 18:24:00,837 - INFO - Start generating data of size 128 with method noise and remove below line
+2023-08-16 18:30:30,049 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-16 18:30:30,049 - INFO - Start generating data of size 128 with method noise and remove below line
+2023-08-16 18:31:39,613 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'overview', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 100, 'latent_size': 10, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 18:33:11,733 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'BiM', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-16 18:33:11,733 - INFO - Start generating data of size 128 with method BiM and remove below line
+2023-08-16 18:40:17,483 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-16 18:40:17,484 - INFO - Data already exists
+2023-08-16 18:40:17,531 - INFO - Start training on Data/Bonn_128_5_RBL_rect with GAN for 10 epochs
+2023-08-16 18:45:00,622 - INFO - Finished training
+2023-08-16 18:45:00,623 - INFO - Start discovering directions for Data/Bonn_128_5_RBL_rect_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-16 18:45:28,850 - INFO - Finished discovering directions
+2023-08-16 18:45:35,904 - INFO - Finished creating samples
+2023-08-16 18:45:53,538 - INFO - Finished showing paths
+2023-08-16 18:45:53,539 - INFO - Finished moving data
+2023-08-16 18:54:05,057 - INFO - Finished creating better plots
+2023-08-16 18:54:05,057 - INFO - Finished discovering directions
+2023-08-16 18:54:05,057 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-16 18:54:05,057 - INFO - Data already exists
+2023-08-16 18:54:05,059 - INFO - Start training on Data/Bonn_128_5_RBL_rect with GAN for 200 epochs
+2023-08-16 20:21:18,572 - INFO - Too many failures, quit trying
+2023-08-16 20:21:18,573 - INFO - Training failed, G is None
+2023-08-16 20:21:18,573 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'BiM', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-16 20:21:18,573 - INFO - Data already exists
+2023-08-16 20:21:18,574 - INFO - Start training on Data/Bonn_128_5_RBL_rect_bim with GAN for 200 epochs
+2023-08-16 23:19:32,698 - INFO - Too many failures, quit trying
+2023-08-16 23:19:32,735 - INFO - Training failed, G is None
+2023-08-16 23:19:32,735 - INFO - Encountered early stop
+2023-08-16 23:19:32,735 - INFO - Finished
+2023-08-17 10:26:39,752 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 10:26:39,770 - INFO - Data already exists
+2023-08-17 10:26:39,854 - INFO - Start training on Data/Bonn_128_5_RBL_rect with GAN for 200 epochs
+2023-08-17 10:45:26,614 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 10:45:26,614 - INFO - Data already exists
+2023-08-17 10:48:13,752 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 6, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 10:48:13,752 - INFO - Start generating data of size 128 with method noise and remove below line
+2023-08-17 10:48:47,919 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 6, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 10:48:47,919 - INFO - Start generating data of size 128 with method noise and remove below line
+2023-08-17 10:50:45,625 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': True, 'image_size': 128, 'minimum_drusen_height': 6, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 10:50:45,625 - INFO - Start generating data of size 128 with method noise and remove below line
+2023-08-17 10:54:18,203 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 6, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 10:54:18,203 - INFO - Start generating data of size 128 with method noise
+2023-08-17 11:19:57,043 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 11:19:57,043 - INFO - Start generating data of size 128 with method noise
+2023-08-17 11:26:33,029 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 11:26:33,029 - INFO - Start generating data of size 128 with method noise
+2023-08-17 11:59:45,362 - INFO - Finished training
+2023-08-17 11:59:45,384 - INFO - Start discovering directions for Data/Bonn_128_5_RBL_rect_aug_bce_results_GAN_200epochs_20nz_warp200000 with method warp, for 200000 steps.
+2023-08-17 13:18:54,308 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 13:18:54,308 - INFO - Start generating data of size 128 with method noise
+2023-08-17 13:19:11,442 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 200 epochs
+2023-08-17 13:35:48,018 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 13:35:48,018 - INFO - Data already exists
+2023-08-17 13:35:48,055 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 200 epochs
+2023-08-17 13:38:12,191 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 13:38:12,191 - INFO - Data already exists
+2023-08-17 13:38:12,234 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 200 epochs
+2023-08-17 13:39:45,437 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 13:39:45,437 - INFO - Data already exists
+2023-08-17 13:39:45,479 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 200 epochs
+2023-08-17 13:39:59,724 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 13:39:59,724 - INFO - Data already exists
+2023-08-17 13:39:59,763 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 200 epochs
+2023-08-17 13:41:01,291 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 13:41:01,291 - INFO - Data already exists
+2023-08-17 13:41:01,360 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 200 epochs
+2023-08-17 13:41:48,475 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 13:41:48,476 - INFO - Data already exists
+2023-08-17 13:41:48,524 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 200 epochs
+2023-08-17 13:43:07,922 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 13:43:07,923 - INFO - Data already exists
+2023-08-17 13:43:07,971 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 200 epochs
+2023-08-17 13:44:44,943 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': False}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 13:44:44,943 - INFO - Start generating data of size 128 with method noise
+2023-08-17 13:44:52,625 - INFO - Start training on Data/Bonn_128_5 with GAN for 200 epochs
+2023-08-17 13:46:26,946 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': False}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 13:46:26,947 - INFO - Data already exists
+2023-08-17 13:46:26,985 - INFO - Start training on Data/Bonn_128_5 with GAN for 200 epochs
+2023-08-17 13:47:52,470 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': False}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 13:47:52,471 - INFO - Data already exists
+2023-08-17 13:47:52,509 - INFO - Start training on Data/Bonn_128_5 with GAN for 200 epochs
+2023-08-17 13:49:14,730 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 13:49:14,731 - INFO - Data already exists
+2023-08-17 13:49:14,801 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 200 epochs
+2023-08-17 13:51:01,230 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 13:51:01,231 - INFO - Data already exists
+2023-08-17 13:51:01,274 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 200 epochs
+2023-08-17 13:52:47,957 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 13:52:47,957 - INFO - Data already exists
+2023-08-17 13:52:47,996 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 200 epochs
+2023-08-17 13:57:21,993 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 13:57:21,994 - INFO - Data already exists
+2023-08-17 13:57:22,033 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 200 epochs
+2023-08-17 14:59:16,467 - INFO - Finished training
+2023-08-17 14:59:16,467 - INFO - Start discovering directions for Data/Bonn_128_5_rect_aug_bce_results_GAN_200epochs_20nz_warp200000 with method warp, for 200000 steps.
+2023-08-17 14:59:22,022 - INFO - Finished discovering directions
+2023-08-17 14:59:27,569 - INFO - Finished creating samples
+2023-08-17 14:59:31,498 - INFO - Finished showing paths
+2023-08-17 14:59:31,499 - INFO - Finished moving data
+2023-08-17 15:23:01,386 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-17 15:23:01,386 - INFO - Data already exists
+2023-08-17 15:23:01,463 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 10 epochs
+2023-08-17 15:26:10,307 - INFO - Finished training
+2023-08-17 15:26:10,307 - INFO - Start discovering directions for Data/Bonn_128_5_rect_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-17 15:26:35,306 - INFO - Finished discovering directions
+2023-08-17 15:26:42,790 - INFO - Finished creating samples
+2023-08-17 15:26:58,151 - INFO - Finished showing paths
+2023-08-17 15:26:58,152 - INFO - Finished moving data
+2023-08-17 15:34:25,774 - INFO - Finished creating plots
+2023-08-17 15:34:25,774 - INFO - Finished discovering directions
+2023-08-17 15:34:25,774 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 15:34:25,774 - INFO - Data already exists
+2023-08-17 15:34:25,775 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 200 epochs
+2023-08-17 15:34:25,775 - INFO - Already trained with these settings
+2023-08-17 15:34:25,831 - INFO - Start discovering directions for Data/Bonn_128_5_rect_aug_bce_results_GAN_200epochs_20nz_warp200000 with method warp, for 200000 steps.
+2023-08-17 15:34:31,707 - INFO - Finished discovering directions
+2023-08-17 15:34:37,389 - INFO - Finished creating samples
+2023-08-17 15:34:41,377 - INFO - Finished showing paths
+2023-08-17 15:34:41,378 - INFO - Finished moving data
+2023-08-17 15:35:41,108 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-17 15:35:41,109 - INFO - Data already exists
+2023-08-17 15:35:41,150 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 10 epochs
+2023-08-17 15:35:41,150 - INFO - Already trained with these settings
+2023-08-17 15:35:42,623 - INFO - Start discovering directions for Data/Bonn_128_5_rect_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-17 15:35:42,624 - INFO - Already discovered directions
+2023-08-17 15:35:42,624 - INFO - Finished discovering directions
+2023-08-17 15:35:42,624 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 15:35:42,624 - INFO - Data already exists
+2023-08-17 15:35:42,624 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 200 epochs
+2023-08-17 15:35:42,624 - INFO - Already trained with these settings
+2023-08-17 15:35:42,664 - INFO - Start discovering directions for Data/Bonn_128_5_rect_aug_bce_results_GAN_200epochs_20nz_warp200000 with method warp, for 200000 steps.
+2023-08-17 15:37:09,896 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-17 15:37:09,896 - INFO - Data already exists
+2023-08-17 15:37:09,937 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 10 epochs
+2023-08-17 15:37:09,937 - INFO - Already trained with these settings
+2023-08-17 15:37:11,503 - INFO - Start discovering directions for Data/Bonn_128_5_rect_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-17 15:37:11,503 - INFO - Already discovered directions
+2023-08-17 15:37:11,503 - INFO - Finished discovering directions
+2023-08-17 15:37:11,503 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'ComplexGAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 15:37:11,503 - INFO - Data already exists
+2023-08-17 15:37:11,504 - INFO - Start training on Data/Bonn_128_5_rect with ComplexGAN for 10 epochs
+2023-08-17 15:39:37,994 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-17 15:39:37,994 - INFO - Data already exists
+2023-08-17 15:39:38,034 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 10 epochs
+2023-08-17 15:39:38,034 - INFO - Already trained with these settings
+2023-08-17 15:39:39,471 - INFO - Start discovering directions for Data/Bonn_128_5_rect_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-17 15:39:39,471 - INFO - Already discovered directions
+2023-08-17 15:39:39,471 - INFO - Finished discovering directions
+2023-08-17 15:39:39,471 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'ComplexGAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 15:39:39,471 - INFO - Data already exists
+2023-08-17 15:39:39,472 - INFO - Start training on Data/Bonn_128_5_rect with ComplexGAN for 10 epochs
+2023-08-17 15:40:45,788 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-17 15:40:45,788 - INFO - Data already exists
+2023-08-17 15:40:45,830 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 10 epochs
+2023-08-17 15:40:45,830 - INFO - Already trained with these settings
+2023-08-17 15:40:47,469 - INFO - Start discovering directions for Data/Bonn_128_5_rect_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-17 15:40:47,469 - INFO - Already discovered directions
+2023-08-17 15:40:47,469 - INFO - Finished discovering directions
+2023-08-17 15:40:47,469 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'ComplexGAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 15:40:47,470 - INFO - Data already exists
+2023-08-17 15:40:47,471 - INFO - Start training on Data/Bonn_128_5_rect with ComplexGAN for 10 epochs
+2023-08-17 15:41:24,928 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-17 15:41:24,928 - INFO - Data already exists
+2023-08-17 15:41:24,968 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 10 epochs
+2023-08-17 15:41:24,969 - INFO - Already trained with these settings
+2023-08-17 15:41:26,468 - INFO - Start discovering directions for Data/Bonn_128_5_rect_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-17 15:41:26,468 - INFO - Already discovered directions
+2023-08-17 15:41:26,468 - INFO - Finished discovering directions
+2023-08-17 15:41:26,468 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'ComplexGAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 15:41:26,468 - INFO - Data already exists
+2023-08-17 15:41:26,470 - INFO - Start training on Data/Bonn_128_5_rect with ComplexGAN for 10 epochs
+2023-08-17 15:44:49,396 - INFO - Finished training
+2023-08-17 15:44:49,397 - INFO - Start discovering directions for Data/Bonn_128_5_rect_aug_bce_results_ComplexGAN_10epochs_20nz_warp200000 with method warp, for 200000 steps.
+2023-08-17 15:44:55,158 - INFO - Finished discovering directions
+2023-08-17 15:45:00,914 - INFO - Finished creating samples
+2023-08-17 15:46:27,420 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-17 15:46:27,420 - INFO - Data already exists
+2023-08-17 15:46:27,485 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 10 epochs
+2023-08-17 15:46:27,485 - INFO - Already trained with these settings
+2023-08-17 15:46:28,886 - INFO - Start discovering directions for Data/Bonn_128_5_rect_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-17 15:46:28,886 - INFO - Already discovered directions
+2023-08-17 15:46:28,886 - INFO - Finished discovering directions
+2023-08-17 15:46:28,887 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'ComplexGAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 15:46:28,887 - INFO - Data already exists
+2023-08-17 15:46:28,887 - INFO - Start training on Data/Bonn_128_5_rect with ComplexGAN for 10 epochs
+2023-08-17 15:49:49,061 - INFO - Finished training
+2023-08-17 15:49:49,062 - INFO - Start discovering directions for Data/Bonn_128_5_rect_aug_bce_results_ComplexGAN_10epochs_20nz_warp200000 with method warp, for 200000 steps.
+2023-08-17 15:51:29,076 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-17 15:51:29,076 - INFO - Data already exists
+2023-08-17 15:51:29,117 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 10 epochs
+2023-08-17 15:51:29,117 - INFO - Already trained with these settings
+2023-08-17 15:51:30,601 - INFO - Start discovering directions for Data/Bonn_128_5_rect_aug_bce_results_GAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-17 15:51:30,601 - INFO - Already discovered directions
+2023-08-17 15:51:30,601 - INFO - Finished discovering directions
+2023-08-17 15:51:30,601 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'ComplexGAN', 'num_epochs': 10, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 1000}, 'random_seed': -1}
+2023-08-17 15:51:30,601 - INFO - Data already exists
+2023-08-17 15:51:30,602 - INFO - Start training on Data/Bonn_128_5_rect with ComplexGAN for 10 epochs
+2023-08-17 15:51:30,602 - INFO - Already trained with these settings
+2023-08-17 15:51:30,664 - INFO - Start discovering directions for Data/Bonn_128_5_rect_aug_bce_results_ComplexGAN_10epochs_20nz_warp1000 with method warp, for 1000 steps.
+2023-08-17 15:51:59,619 - INFO - Finished discovering directions
+2023-08-17 15:52:07,256 - INFO - Finished creating samples
+2023-08-17 15:52:24,444 - INFO - Finished showing paths
+2023-08-17 15:52:24,445 - INFO - Finished moving data
+2023-08-17 16:00:03,216 - INFO - Finished creating plots
+2023-08-17 16:00:03,217 - INFO - Finished discovering directions
+2023-08-17 16:00:03,217 - INFO - Run: {'dataset': {'data_source': 'Bonn', 'method': 'noise', 'remove_below_line': False, 'image_size': 128, 'minimum_drusen_height': 5, 'rectify': True}, 'model': {'train_method': 'GAN', 'num_epochs': 200, 'latent_size': 20, 'augment_data': True, 'mix': False, 'loss': 'bce'}, 'latent_method': {'method': 'warp', 'latent_steps': 200000}, 'random_seed': -1}
+2023-08-17 16:00:03,217 - INFO - Data already exists
+2023-08-17 16:00:03,218 - INFO - Start training on Data/Bonn_128_5_rect with GAN for 200 epochs
+2023-08-17 16:00:03,218 - INFO - Already trained with these settings
+2023-08-17 16:00:03,261 - INFO - Start discovering directions for Data/Bonn_128_5_rect_aug_bce_results_GAN_200epochs_20nz_warp200000 with method warp, for 200000 steps.

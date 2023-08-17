@@ -51,7 +51,7 @@ def generate_overview(folder_path):
 
 def main():
     #check_folder_equals()
-    generate_overview(os.path.join("Data", "Duke_128_5_RBL", "1_ov"))
+    generate_overview(os.path.join("Data", "Bonn_128_5_RBL", "1_ov"))
 
 
 if __name__ == "__main__":

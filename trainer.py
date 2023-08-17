@@ -21,8 +21,10 @@ import torchvision.datasets as dset
 import torchvision.transforms as transforms
 import torchvision.utils as vutils
 
-import ComplexGAN
 import SimpleGAN
+import SimpleGAN_Rect
+import ComplexGAN
+import ComplexGAN_Rect
 
 
 # custom weights initialization called on netG and netD
@@ -112,6 +114,34 @@ def show_current(dataloader, img_list, imgs_folder, epoch, device):
     plt.close()
 
 
+def get_generator(train_method, nz, rectangular):
+    if rectangular:
+        if train_method == "ComplexGAN":
+            G = ComplexGAN_Rect.get_generator(nz)
+        else:
+            G = SimpleGAN_Rect.get_generator(nz)
+    else:
+        if train_method == "ComplexGAN":
+            G = ComplexGAN.get_generator(nz)
+        else:
+            G = SimpleGAN.get_generator(nz)
+    return G
+
+
+def get_discriminator(train_method, rectangular):
+    if rectangular:
+        if train_method == "ComplexGAN":
+            D = ComplexGAN_Rect.get_discriminator()
+        else:
+            D = SimpleGAN_Rect.get_discriminator()
+    else:
+        if train_method == "ComplexGAN":
+            D = ComplexGAN.get_discriminator()
+        else:
+            D = SimpleGAN.get_discriminator()
+    return D
+
+
 def train_own_model(run, folder_out, logger: logging.Logger):
     model_param = run["model"]
     num_epochs = model_param["num_epochs"]
@@ -122,6 +152,8 @@ def train_own_model(run, folder_out, logger: logging.Logger):
     dataroot = run["dataroot"]
     mix = model_param["mix"]
     loss = model_param["loss"]
+    dataset = run["dataset"]
+    rectangular = dataset["rectify"]
     # Number of workers for dataloader
     workers = 16
     # Number of channels in the training images. For color images this is 3
@@ -155,10 +187,7 @@ def train_own_model(run, folder_out, logger: logging.Logger):
     logger.info(f"Start training on {dataroot} with {train_method} for {num_epochs} epochs")
     if os.path.exists(generator_path):
         logger.info("Already trained with these settings")
-        if train_method == "GANComplex":
-            G = ComplexGAN.get_generator(nz)
-        else:
-            G = SimpleGAN.get_generator(nz)
+        G = get_generator(train_method, nz, rectangular)
         G.load_state_dict(torch.load(generator_path))
         G.eval()
         return G, folder_out
@@ -176,10 +205,7 @@ def train_own_model(run, folder_out, logger: logging.Logger):
         dataloader = load_dataset(dataroot, augmented, batch_size, workers)
 
         # Create the generator
-        if train_method == "GANComplex":
-            netG = ComplexGAN.get_generator(nz)
-        else:
-            netG = SimpleGAN.get_generator(nz)
+        netG = get_generator(train_method, nz, rectangular)
 
         # Handle multi-gpu if desired
         if (device.type == 'cuda') and (ngpu > 1):
@@ -193,10 +219,7 @@ def train_own_model(run, folder_out, logger: logging.Logger):
         logger.debug(str(netG))
 
         # Create the Discriminator
-        if train_method == "GANComplex":
-            netD = ComplexGAN.get_discriminator()
-        else:
-            netD = SimpleGAN.get_discriminator()
+        netD = get_discriminator(train_method, rectangular)
 
         # Handle multi-gpu if desired
         if (device.type == 'cuda') and (ngpu > 1):
@@ -325,7 +348,7 @@ def train_own_model(run, folder_out, logger: logging.Logger):
                     logger.debug(f"[{epoch}/{num_epochs}][{i}/{len(dataloader)}]\tLoss_D: {errD.item():.4f}" +
                                  f"\tLoss_G: {errG.item():.4f}\tD(x): {D_x:.4f}\tD(G(z)): {D_G_z1:.4f} / {D_G_z2:.4f}")
 
-                    if errD.item() < loss_d_threshold:
+                    if errD.item() < loss_d_threshold and False:  # stop stopping
                         logger.debug(f"Loss of D is smaller than {loss_d_threshold}, restart training")
                         return False, None
 
@@ -370,14 +393,17 @@ def train_own_model(run, folder_out, logger: logging.Logger):
     i = 0
     while not finished_training:
         i += 1
-        if i == 5:
+        if i == 100:
             logger.info("Too many failures, quit trying")
             return None, folder_out
         finished_training, G = train_loop(i, random_seed)
 
-    model_path = "SimpleGAN.py"
-    if train_method == "GANComplex":
-        model_path = "ComplexGAN.py"
+    model_path = "SimpleGAN"
+    if train_method == "ComplexGAN":
+        model_path = "ComplexGAN"
+    if rectangular:
+        model_path += "_Rect"
+    model_path += ".py"
     shutil.copy(model_path, os.path.join(folder_out, "model.py"))
 
     logger.info("Finished training")
@@ -499,7 +525,7 @@ def train(run, logger: logging.Logger):
         file_handler.close()
         logger.removeHandler(file_handler)
 
-    if train_method == "GAN" or train_method == "GANComplex":
+    if train_method == "GAN" or train_method == "ComplexGAN":
         G, folder_out = train_own_model(run, folder_out, logger)
         close_logger()
         return G, folder_out

@@ -150,7 +150,6 @@ def normalize(data):
 def ffdnet_one(image_in, datatype, noise_sigma, model):
     # imorig = cv2.imread(file_in, cv2.IMREAD_GRAYSCALE)
     imorig = image_in
-    # print(imorig)
     imorig = np.expand_dims(imorig, 0)
     imorig = np.expand_dims(imorig, 0)
     imorig = normalize(imorig)
@@ -173,10 +172,13 @@ def get_drusen_folder(run):
     target_image_size = dataset["image_size"]
     minimum_drusen_height = dataset["minimum_drusen_height"]
     remove_below_line = dataset["remove_below_line"]
+    rectify = dataset["rectify"]
 
     target_dir = f"{data_src}_{target_image_size}_{minimum_drusen_height}"
     if remove_below_line:
         target_dir += "_RBL"
+    if rectify:
+        target_dir += "_rect"
     return os.path.join("Data", target_dir, "1")
 
 
@@ -186,35 +188,78 @@ def get_gauss_sigma(run):
 
 def rbl(im, ind):
     mask = np.zeros_like(im)
-    line_values = ind + 20
+    line_values = ind + 10
     rows = np.arange(im.shape[0])[:, np.newaxis]
     mask[rows < line_values] = 1
     return im * mask
 
 
-def process_scan(data, i, erosion_kernel_width, min_pixels_threshold,
-                 target_image_size, target_dir, remove_below_line, target_filename, method):
-    scan = data.volume_maps["drusen"].data[i]
-    scan = binary_erosion(scan, iterations=1, structure=np.ones((erosion_kernel_width, erosion_kernel_width)))
+def move_down(im, line):
+    shift_values = np.max(line) - line
+    shifted_im = np.zeros_like(im)
+    #shifted_im[(slice(None), np.arange(im.shape[1]))] = im[(shift_values, np.arange(im.shape[1]))]
+    for col in range(im.shape[1]):
+        shifted_im[:, col] = np.roll(im[:, col], shift_values[col])
+    return shifted_im
 
+
+def process_scan(data, i, erosion_kernel_width, min_pixels_threshold,
+                 target_image_size, target_dir, remove_below_line, target_filename, method, is_duke, rectify):
+
+    # Original line
+    line = np.asarray(data.layers["BM_2c41ukad" if is_duke else "BM"].data[i])
+    # Remove nans from line
+    nan_indices = np.argwhere(np.isnan(line)).ravel()
+    if len(nan_indices) > 0:
+        is_at_start = nan_indices[0] == 0
+        last = 0
+        if is_at_start:
+            for index in nan_indices:
+                if index == last:
+                    last = index + 1
+                else:
+                    break
+        for index in nan_indices[last:]:
+            line[index] = line[index - 1]
+        while last > 0:
+            line[last - 1] = line[last]
+            last -= 1
+    line = line.astype(int)
+
+    # Compute smooth line
+    smooth_line = gaussian_filter(line, sigma=5)  # 5 seems to be good, 10 is not smoother
+    im = rbl(data.data[i], smooth_line) if remove_below_line else data.data[i]
+    if method == 6:  # overview
+        im = np.repeat(im[:, :, np.newaxis], 3, axis=2)
+        im[line, np.arange(im.shape[1])] = np.array([0, 0, 255], dtype=int)
+        im[smooth_line, np.arange(im.shape[1])] = np.array([0, 255, 0], dtype=int)
+
+    if rectify:
+        #filepath = os.path.join(target_dir, f"{target_filename}_scan{i:02d}.png")
+        #cv2.imwrite(filepath, im)
+        im = move_down(im, smooth_line)
+        #filepath = os.path.join(target_dir, f"{target_filename}_scan{i:02d}_.png")
+        #cv2.imwrite(filepath, im)
+
+    # Drusen calculation
+    scan = data.volume_maps["drusen"].data[i]
+    if rectify:
+        scan = move_down(scan, smooth_line)
+    scan = binary_erosion(scan, iterations=1, structure=np.ones((erosion_kernel_width, erosion_kernel_width)))
     # Calculate the connected components
     labeled_scan, num_drusen = label(scan)
-
     # Calculate the center of each cluster that is large enough
     centers = []
     for drusen_id in range(1, num_drusen + 1):
         if np.count_nonzero(labeled_scan == drusen_id) < min_pixels_threshold:
-            break
+            continue
         cluster_center = center_of_mass(scan, labeled_scan, drusen_id)
         centers.append((int(cluster_center[0]), int(cluster_center[1])))
-
-    height, width = scan.shape
     if not centers:
         return
-    im = rbl(data.data[i], np.asarray(data.layers["BM"].data[i], dtype=int)) if remove_below_line else data.data[i]
-    if method == 6:
-        im[np.asarray(data.layers["BM"].data[i], dtype=int), np.arange(im.shape[1])] = 0
 
+    # Creating patches
+    height, width = scan.shape
     for j, (row, col) in enumerate(centers):
         # Calculate start and end values for row indices
         start_row = row - target_image_size // 2
@@ -240,14 +285,25 @@ def process_scan(data, i, erosion_kernel_width, min_pixels_threshold,
             start_col = width - target_image_size
             end_col = width
 
+        # Adjust rows for smooth line
+        if rectify:
+            diff = end_row - np.max(smooth_line) - 10
+            end_row -= diff
+            start_row -= diff
+            start_row += 64  # Make it rectangular
+
         filepath = os.path.join(target_dir, f"{target_filename}_scan{i:02d}_drusen{j:02d}.png")
-        to_save = im[start_row:end_row, start_col:end_col] # numpy ndarray (128,128)
+
+        if method == 6:
+            to_save = im[start_row:end_row, start_col:end_col, :]  # numpy ndarray (128,128, 3)
+        else:
+            to_save = im[start_row:end_row, start_col:end_col]  # numpy ndarray (128,128)
 
         cv2.imwrite(filepath, to_save)
 
 
 def process_file(filename, file_regex, minimum_drusen_height, erosion_kernel_width, min_pixels_threshold,
-                 target_image_size, target_dir, remove_below_line, method):
+                 target_image_size, target_dir, remove_below_line, method, is_duke, rectify):
     target_filename = os.path.split(filename)[-1][:-len(file_regex) + 1]
 
     # Get eroded data
@@ -257,7 +313,7 @@ def process_file(filename, file_regex, minimum_drusen_height, erosion_kernel_wid
     data.add_pixel_annotation(drusen5, name="drusen5")
     for i in range(len(data)):
         process_scan(data, i, erosion_kernel_width, min_pixels_threshold,
-                     target_image_size, target_dir, remove_below_line, target_filename, method)
+                     target_image_size, target_dir, remove_below_line, target_filename, method, is_duke, rectify)
     return
 
 
@@ -293,15 +349,16 @@ def filter_file(filepath, method, target_dir, gauss_sigma):
 
 
 def generate(run, target_dir, method):
+
+    # Only raw drusen should be generated
+    if method == 0:
+        generate_drusen(run, method)
+        return
+
     # INIT Folders
     os.makedirs(target_dir, exist_ok=True)
     target_dir = os.path.join(target_dir, "1")  # Add a sub folder for data loader
     os.makedirs(target_dir, exist_ok=True)
-
-    # Only raw drusen should be generated
-    if method == 0:
-        generate_drusen(run)
-        return
 
     src_dir = get_drusen_folder(run)
 
@@ -347,6 +404,8 @@ def generate_drusen(run, method):
     target_image_size = dataset["image_size"]
     remove_below_line = dataset["remove_below_line"]
     minimum_drusen_height = dataset["minimum_drusen_height"]
+    rectify = dataset["rectify"]
+
     target_dir = get_drusen_folder(run)
     if method == 6:
         target_dir = target_dir + "_ov"
@@ -354,8 +413,10 @@ def generate_drusen(run, method):
             shutil.rmtree(target_dir)
     os.makedirs(target_dir)
 
-    folder = os.path.join("Data", "Duke_processed")
-    file_regex = "*.mat.eye"
+    is_duke = dataset["data_source"] == "Duke"
+
+    folder = os.path.join("Data", "Duke_processed" if is_duke else "Bonn")
+    file_regex = "*.eye"
     erosion_kernel_width = 7
     min_pixels_threshold = 20
     files = glob.glob(os.path.join(folder, file_regex))
@@ -364,7 +425,8 @@ def generate_drusen(run, method):
                                    erosion_kernel_width=erosion_kernel_width,
                                    min_pixels_threshold=min_pixels_threshold,
                                    target_image_size=target_image_size,
-                                   target_dir=target_dir, remove_below_line=remove_below_line, method=method)
+                                   target_dir=target_dir, remove_below_line=remove_below_line, method=method,
+                                   is_duke=is_duke, rectify=rectify)
     pool.map(partial_process_item, files)
 
     pool.close()
@@ -379,6 +441,7 @@ def gen_data(run, logger: logging.Logger):
     target_image_size = dataset["image_size"]
     remove_below_line = dataset["remove_below_line"]
     minimum_drusen_height = dataset["minimum_drusen_height"]
+    rectify = dataset["rectify"]
 
     is_for_stylegan = run["model"]["train_method"] == "StyleGAN"
 
@@ -387,6 +450,8 @@ def gen_data(run, logger: logging.Logger):
     target_dir = f"{data_src}_{target_image_size}_{minimum_drusen_height}"
     if remove_below_line:
         target_dir += "_RBL"
+    if rectify:
+        target_dir += "_rect"
     if noise_method.startswith("Gauss"):
         method = 1
         gauss_sigma = get_gauss_sigma(run)
@@ -408,13 +473,14 @@ def gen_data(run, logger: logging.Logger):
         method = 6
         target_dir = target_dir + "_ov"
 
+
     target_dir = os.path.join("Data", target_dir)
     run["dataroot"] = target_dir
 
     # Don't generate if already exists:
     if os.path.exists(target_dir):
         logger.info("Data already exists")
-    if method == 6:  # special case for generating overview
+    elif method == 6:  # special case for generating overview
         generate_drusen(run, method)
     # Don't generate for mnist
     elif method != 3:
