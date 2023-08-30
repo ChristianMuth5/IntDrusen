@@ -8,6 +8,7 @@ import random
 import subprocess
 import sys
 import shutil
+import json
 from datetime import datetime
 
 import matplotlib.pyplot as plt
@@ -16,7 +17,8 @@ import torch
 import torch.nn as nn
 import torch.nn.parallel
 import torch.optim as optim
-import torch.utils.data
+from torch.utils.data import DataLoader, WeightedRandomSampler, Dataset
+from PIL import Image
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 import torchvision.utils as vutils
@@ -25,6 +27,7 @@ import SimpleGAN
 import SimpleGAN_Rect
 import ComplexGAN
 import ComplexGAN_Rect
+import SimpleGAN_Rect_Cond
 
 
 # custom weights initialization called on netG and netD
@@ -54,8 +57,37 @@ def get_mean_and_std(dataloader):
     return mean, std
 
 
+class CustomDataset(Dataset):
+    def __init__(self, image_folder, info_dict, sorted_keys, transform=None, conditions=None):
+        self.image_folder = image_folder
+        self.info_dict = info_dict
+        self.sorted_keys = sorted_keys
+        self.transform = transform
+        self.conditions = conditions
+        self.is_volume = len(self.conditions) == 1 and 2 in self.conditions
+
+    def __len__(self):
+        return len(self.info_dict)
+
+    def __getitem__(self, index):
+        fname = self.sorted_keys[index]
+        image_path = os.path.join(self.image_folder, "1", fname)
+        image = Image.open(image_path)
+        if self.transform is not None:
+            image = self.transform(image)
+
+        if self.conditions is None:
+            return image
+
+        if self.is_volume:
+            labels = torch.tensor(int(self.info_dict[fname][2]))
+        else:
+            labels = torch.tensor(np.asarray(self.info_dict[fname])[self.conditions])
+        return image, labels
+
+
 # Loads the specified dataset
-def load_dataset(droot, augmented, batch_size, workers):
+def load_dataset(droot, augmented, batch_size, workers, conditions, weight_samples):
     # dataset = dset.ImageFolder(root=droot,
     #                           transform=transforms.Compose([
     #                               transforms.Grayscale(),
@@ -69,26 +101,42 @@ def load_dataset(droot, augmented, batch_size, workers):
     std = 0.5
 
     if augmented:
-        dataset = dset.ImageFolder(root=droot,
-                                   transform=transforms.Compose([
-                                       transforms.Grayscale(),
-                                       transforms.ToTensor(),
-                                       # transforms.RandomRotation(15),
-                                       transforms.RandomHorizontalFlip(),
-                                       transforms.Normalize(mean, std),
-                                   ]))
+        transformations = transforms.Compose([
+            transforms.Grayscale(),
+            transforms.ToTensor(),
+            transforms.RandomHorizontalFlip(),
+            transforms.Normalize(mean, std)
+        ])
     else:
-        dataset = dset.ImageFolder(root=droot,
-                                   transform=transforms.Compose([
-                                       transforms.Grayscale(),
-                                       transforms.ToTensor(),
-                                       transforms.Normalize(mean, std),
-                                   ]))
+        transformations = transforms.Compose([
+            transforms.Grayscale(),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std),
+        ])
+
+    with open(os.path.join(droot, "info_dict.json")) as f:
+        info = json.load(f)
 
     # Create the dataloader
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
-                                             shuffle=True, num_workers=workers)
-    dataloader.pin_memory = True
+    if weight_samples:
+        dataset = CustomDataset(droot, info, sorted(info.keys()), transformations, [2])
+
+        #vals = np.asarray(list(info.values()))[:, 2]
+        #class_counts = np.unique(vals, return_counts=True)[1]
+        #class_weights = 1 / class_counts
+        # Manual set to probabilities: p, 2*p, 4*p, 8*p, 16*p
+        #class_weights = class_weights * np.asarray([1, 4 / 6, 8 / 29, 16 / 111, 32 / 775])
+        class_weights = np.asarray([1 / 2 ** n for n in range(5, 0, -1)])
+
+        sample_weights = torch.tensor([class_weights[x[1]] for x in dataset])
+
+        sampler = WeightedRandomSampler(weights=sample_weights, num_samples=len(dataset), replacement=True)
+
+        dataloader = DataLoader(dataset, batch_size=batch_size, num_workers=workers, sampler=sampler)
+    else:
+        dataset = CustomDataset(droot, info, sorted(info.keys()), transformations, conditions)
+        dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=workers)
+
     return dataloader
 
 
@@ -114,32 +162,62 @@ def show_current(dataloader, img_list, imgs_folder, epoch, device):
     plt.close()
 
 
-def get_generator(train_method, nz, rectangular):
-    if rectangular:
-        if train_method == "ComplexGAN":
-            G = ComplexGAN_Rect.get_generator(nz)
+def get_generator(train_method, nz, rectangular, ngpu, conditions):
+    if conditions:
+        if rectangular:
+            if train_method == "ComplexGAN":
+                G = None
+            else:
+                G = SimpleGAN_Rect_Cond.get_generator(ngpu, nz, conditions)
         else:
-            G = SimpleGAN_Rect.get_generator(nz)
+            if train_method == "ComplexGAN":
+                G = None
+            else:
+                G = None
     else:
-        if train_method == "ComplexGAN":
-            G = ComplexGAN.get_generator(nz)
+        if rectangular:
+            if train_method == "ComplexGAN":
+                G = ComplexGAN_Rect.get_generator(ngpu, nz)
+            else:
+                G = SimpleGAN_Rect.get_generator(ngpu, nz)
         else:
-            G = SimpleGAN.get_generator(nz)
+            if train_method == "ComplexGAN":
+                G = ComplexGAN.get_generator(ngpu, nz)
+            else:
+                G = SimpleGAN.get_generator(ngpu, nz)
     return G
 
 
-def get_discriminator(train_method, rectangular):
-    if rectangular:
-        if train_method == "ComplexGAN":
-            D = ComplexGAN_Rect.get_discriminator()
+def get_discriminator(train_method, rectangular, ngpu, conditions):
+    if conditions:
+        if rectangular:
+            if train_method == "ComplexGAN":
+                D = None
+            else:
+                D = SimpleGAN_Rect_Cond.get_discriminator(ngpu, conditions)
         else:
-            D = SimpleGAN_Rect.get_discriminator()
+            if train_method == "ComplexGAN":
+                D = None
+            else:
+                D = None
     else:
-        if train_method == "ComplexGAN":
-            D = ComplexGAN.get_discriminator()
+        if rectangular:
+            if train_method == "ComplexGAN":
+                D = ComplexGAN_Rect.get_discriminator(ngpu)
+            else:
+                D = SimpleGAN_Rect.get_discriminator(ngpu)
         else:
-            D = SimpleGAN.get_discriminator()
+            if train_method == "ComplexGAN":
+                D = ComplexGAN.get_discriminator(ngpu)
+            else:
+                D = SimpleGAN.get_discriminator(ngpu)
     return D
+
+
+def feed_D(D, input, labels):
+    if labels is None:
+        return D(input).view(-1)
+    return D(input, labels).view(-1)
 
 
 def train_own_model(run, folder_out, logger: logging.Logger):
@@ -152,8 +230,11 @@ def train_own_model(run, folder_out, logger: logging.Logger):
     dataroot = run["dataroot"]
     mix = model_param["mix"]
     loss = model_param["loss"]
+    conditions = model_param["conditions"]
+    conditional = len(conditions) > 0
     dataset = run["dataset"]
     rectangular = dataset["rectify"]
+    weight_samples = model_param["weight_samples"] if "weight_samples" in model_param else False
     # Number of workers for dataloader
     workers = 16
     # Number of channels in the training images. For color images this is 3
@@ -179,7 +260,7 @@ def train_own_model(run, folder_out, logger: logging.Logger):
     # Beta1 hyperparam for Adam optimizers
     beta1 = 0.5
     # Batch size during training
-    batch_size = 32
+    batch_size = model_param["batch_size"]
 
     generator_path = os.path.join(folder_out, "generator.pt")
     discriminator_path = os.path.join(folder_out, "discriminator.pt")
@@ -187,7 +268,7 @@ def train_own_model(run, folder_out, logger: logging.Logger):
     logger.info(f"Start training on {dataroot} with {train_method} for {num_epochs} epochs")
     if os.path.exists(generator_path):
         logger.info("Already trained with these settings")
-        G = get_generator(train_method, nz, rectangular)
+        G = get_generator(train_method, nz, rectangular, ngpu, conditions)
         G.load_state_dict(torch.load(generator_path))
         G.eval()
         return G, folder_out
@@ -202,10 +283,10 @@ def train_own_model(run, folder_out, logger: logging.Logger):
         random.seed(seed)
         torch.manual_seed(seed)
 
-        dataloader = load_dataset(dataroot, augmented, batch_size, workers)
+        dataloader = load_dataset(dataroot, augmented, batch_size, workers, conditions, weight_samples)
 
         # Create the generator
-        netG = get_generator(train_method, nz, rectangular)
+        netG = get_generator(train_method, nz, rectangular, ngpu, conditions)
 
         # Handle multi-gpu if desired
         if (device.type == 'cuda') and (ngpu > 1):
@@ -219,7 +300,7 @@ def train_own_model(run, folder_out, logger: logging.Logger):
         logger.debug(str(netG))
 
         # Create the Discriminator
-        netD = get_discriminator(train_method, rectangular)
+        netD = get_discriminator(train_method, rectangular, ngpu, conditions)
 
         # Handle multi-gpu if desired
         if (device.type == 'cuda') and (ngpu > 1):
@@ -264,6 +345,9 @@ def train_own_model(run, folder_out, logger: logging.Logger):
 
         logger.debug("Starting Training Loop...")
 
+        # Count how often the loss of G or D is too small in a streak
+        failure_streak = 0
+
         # For each epoch
         epoch = 0
         while epoch < num_epochs:
@@ -282,8 +366,14 @@ def train_own_model(run, folder_out, logger: logging.Logger):
                 real_cpu = data[0].to(device)
                 b_size = real_cpu.size(0)
                 label = torch.full((b_size,), real_label, dtype=torch.float, device=device)
+
+                # TEMP:
+                labels = None
+                if conditional:
+                    labels = data[1].unsqueeze_(1).unsqueeze_(2).unsqueeze_(3).to(device).type(torch.float)
+
                 # Forward pass real batch through D
-                output = netD(real_cpu).view(-1)
+                output = feed_D(netD, real_cpu, labels)
                 # Calculate loss on all-real batch
                 errD_real = criterion(output, label)
                 # Calculate gradients for D in backward pass
@@ -292,12 +382,15 @@ def train_own_model(run, folder_out, logger: logging.Logger):
 
                 # Train with all-fake batch
                 # Generate batch of latent vectors
-                noise = torch.randn(b_size, nz, 1, 1, device=device)
+                if conditional:
+                    noise = torch.cat((labels, torch.randn(b_size, nz-len(conditions), 1, 1, device=device)), dim=1)
+                else:
+                    noise = torch.randn(b_size, nz, 1, 1, device=device)
                 # Generate fake image batch with G
                 fake = netG(noise)
                 label.fill_(fake_label)
                 # Classify all fake batch with D
-                output = netD(fake.detach()).view(-1)
+                output = feed_D(netD, fake.detach(), labels)
                 # Calculate D's loss on the all-fake batch
                 errD_fake = criterion(output, label)
                 # Calculate the gradients for this batch, accumulated (summed) with previous gradients
@@ -311,7 +404,7 @@ def train_own_model(run, folder_out, logger: logging.Logger):
                         factor = torch.normal(0.5, 0.1, (1,)).data[0]
                     mixed_data = real_cpu * factor + fake.detach() * (1.0 - factor)
                     label.fill_(real_label * factor + fake_label * (1.0 - factor))
-                    output = netD(mixed_data).view(-1)
+                    output = feed_D(netD, mixed_data, labels)
                     errD_mix = criterion(output, label)
                     errD_mix.backward()
                     D_mix = output.mean().item()
@@ -330,7 +423,7 @@ def train_own_model(run, folder_out, logger: logging.Logger):
                 netG.zero_grad()
                 label.fill_(real_label)  # fake labels are real for generator cost
                 # Since we just updated D, perform another forward pass of all-fake batch through D
-                output = netD(fake).view(-1)
+                output = feed_D(netD, fake, labels)
                 # Calculate G's loss based on this output
                 errG = criterion(output, label)
                 # Calculate gradients for G
@@ -348,8 +441,13 @@ def train_own_model(run, folder_out, logger: logging.Logger):
                     logger.debug(f"[{epoch}/{num_epochs}][{i}/{len(dataloader)}]\tLoss_D: {errD.item():.4f}" +
                                  f"\tLoss_G: {errG.item():.4f}\tD(x): {D_x:.4f}\tD(G(z)): {D_G_z1:.4f} / {D_G_z2:.4f}")
 
-                    if errD.item() < loss_d_threshold and False:  # stop stopping
-                        logger.debug(f"Loss of D is smaller than {loss_d_threshold}, restart training")
+                    # See if the training might fail
+                    if errD.item() < loss_d_threshold or errD.item() > 100 - loss_d_threshold:
+                        failure_streak += 1
+                    else:
+                        failure_streak = 0
+                    if failure_streak > 9:  # stop stopping
+                        logger.debug(f"Loss of D is smaller than {loss_d_threshold}, 10 times in a row, restart training")
                         return False, None
 
                 iters += 1
@@ -393,7 +491,7 @@ def train_own_model(run, folder_out, logger: logging.Logger):
     i = 0
     while not finished_training:
         i += 1
-        if i == 100:
+        if i == 10:
             logger.info("Too many failures, quit trying")
             return None, folder_out
         finished_training, G = train_loop(i, random_seed)
@@ -501,7 +599,9 @@ def train(run, logger: logging.Logger):
     latent_size = model_param["latent_size"]
     mix = model_param["mix"] if not train_method == "StyleGAN" else False
     loss = model_param["loss"] if not train_method == "StyleGAN" else None
+    conditions = model_param["conditions"] if not train_method == "StyleGAN" else []
     dataroot = run["dataroot"]
+    weight_samples = model_param["weight_samples"] if "weight_samples" in model_param else False
 
     # Where to save output
     folder_out = f"{dataroot}"
@@ -511,6 +611,16 @@ def train(run, logger: logging.Logger):
         folder_out += "_mix"
     if loss:
         folder_out += f"_{loss}"
+    if conditions:
+        folder_out += "_c="
+    if 0 in conditions:
+        folder_out += "h"
+    if 1 in conditions:
+        folder_out += "w"
+    if 2 in conditions:
+        folder_out += "v"
+    if weight_samples:
+        folder_out += "_ws"
     folder_out += f"_results_{train_method}_{num_epochs}epochs_{latent_size}nz"
     os.makedirs(folder_out, exist_ok=True)  # General output folder
 

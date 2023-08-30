@@ -7,7 +7,9 @@ from torch import nn
 from hashlib import sha1
 from torchvision.transforms import ToPILImage
 from lib import *
-from models.gan_load import build_biggan, build_proggan, build_stylegan2, build_sngan, build_gan128, build_stylegan3
+from models.gan_load import build_biggan, build_proggan, build_stylegan2, build_sngan, build_gan128
+from models.vae import VAE, ConvVAE
+import numpy as np
 
 
 def tensor2image(tensor, adaptive=False):
@@ -51,8 +53,7 @@ def main():
     """
     parser = argparse.ArgumentParser(description="Sample a pre-trained GAN latent space and generate images")
     parser.add_argument('-v', '--verbose', action='store_true', help="set verbose mode on")
-    parser.add_argument('-g', '--gan-type', type=str, required=True, choices=GAN_WEIGHTS.keys(),
-                        help='GAN generator model type')
+    parser.add_argument('-g', '--gan-type', type=str, required=True, help='GAN generator model type')
     parser.add_argument('--shift-in-w-space', action='store_true', help="search latent paths in StyleGAN2's W-space")
     parser.add_argument('--z-truncation', type=float, help="set latent code sampling truncation parameter")
     parser.add_argument('--biggan-target-classes', nargs='+', type=int, help="list of classes for conditional BigGAN")
@@ -111,15 +112,9 @@ def main():
         print("  \\__Pre-trained weights: {}".format(
             GAN_WEIGHTS[args.gan_type]['weights'][args.stylegan2_resolution] if args.gan_type == 'StyleGAN2' else
             GAN_WEIGHTS[args.gan_type]['weights'][GAN_RESOLUTIONS[args.gan_type]]))
-    
     # === GAN128 ===
     if args.gan_type == 'GAN128':
         G = build_gan128(pretrained_gan_weights=GAN_WEIGHTS[args.gan_type]['weights'][GAN_RESOLUTIONS[args.gan_type]], nz=20)
-    # === StyleGAN3 ===
-    elif args.gan_type == 'StyleGAN3':
-        G = build_stylegan3(pretrained_gan_weights=GAN_WEIGHTS[args.gan_type]['weights'][GAN_RESOLUTIONS[args.gan_type]],
-                            shift_in_w_space=args.shift_in_w_space)
-    
     # -- BigGAN
     elif args.gan_type == 'BigGAN':
         G = build_biggan(pretrained_gan_weights=GAN_WEIGHTS[args.gan_type]['weights'][GAN_RESOLUTIONS[args.gan_type]],
@@ -128,6 +123,14 @@ def main():
     elif args.gan_type == 'ProgGAN':
         G = build_proggan(pretrained_gan_weights=GAN_WEIGHTS[args.gan_type]['weights'][GAN_RESOLUTIONS[args.gan_type]])
     # -- StyleGAN2
+    elif args.gan_type== 'VAE_MNIST':
+        #G = VAE(encoder_layer_sizes=[784,256],latent_size=16,decoder_layer_sizes=[256,784])
+        G = ConvVAE(num_channel=1, latent_size=18 * 18, img_size=28)
+        G.load_state_dict(torch.load("vae_mnist_conv.pt", map_location='cpu'))
+    elif args.gan_type== 'VAE_DSPRITES':
+        #G = ConvVAE(num_channel=1,latent_size=256)
+        G = ConvVAE(num_channel=1, latent_size=15 * 15 + 1, img_size=64)
+        G.load_state_dict(torch.load("vae_dsprites_conv.pt", map_location='cpu'))
     elif args.gan_type == 'StyleGAN2':
         G = build_stylegan2(resolution=args.stylegan2_resolution,
                             pretrained_gan_weights=GAN_WEIGHTS[args.gan_type]['weights'][args.stylegan2_resolution],
@@ -146,12 +149,15 @@ def main():
 
     # Latent codes sampling
     if args.verbose:
-        print("#. Sample {} {}-dimensional latent codes...".format(args.num_samples, G.dim_z))
+        #print("#. Sample {} {}-dimensional latent codes...".format(args.num_samples, G.dim_z))
         if args.z_truncation:
             print("  \\__Truncate standard Gaussian to range [{}, +{}]".format(-args.z_truncation, args.z_truncation))
 
     # zs = torch.randn(args.num_samples, G.dim_z)
-    zs = sample_z(batch_size=args.num_samples, dim_z=G.dim_z, truncation=args.z_truncation)
+    if args.gan_type=='VAE_MNIST' or args.gan_type=='VAE_DSPRITES':
+        zs = sample_z(batch_size=args.num_samples, dim_z=G.latent_size, truncation=args.z_truncation)
+    else:
+        zs = sample_z(batch_size=args.num_samples, dim_z=G.dim_z, truncation=args.z_truncation)
 
     if use_cuda:
         zs = zs.cuda()
@@ -181,8 +187,13 @@ def main():
 
         # Generate image for the given latent code z
         with torch.no_grad():
-            img = G(z).cpu()
-
+            if args.gan_type== 'VAE_MNIST' or args.gan_type=='VAE_DSPRITES':
+                img = G.inference(z).cpu()
+            else:
+                img = G(z).cpu()
+        #if args.gan_type== 'VAE_MNIST':
+        #    H = img.size(1)
+        #    img = img.view(1, int(np.sqrt(H)), int(np.sqrt(H)))
         # Convert image's tensor into an RGB image and save it
         img_pil = tensor2image(img, adaptive=True)
         img_pil.save(osp.join(latent_code_dir, 'image.jpg'), "JPEG", quality=95, optimize=True, progressive=True)

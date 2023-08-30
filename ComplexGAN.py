@@ -2,9 +2,8 @@ import torch
 import torch.nn as nn
 
 
-def get_generator(nz):
+def get_generator(ngpu, nz):
     ngf = 64
-    ngpu = 1
     device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
     nc = 1
 
@@ -12,6 +11,9 @@ def get_generator(nz):
         def __init__(self, ngpu):
             super(GeneratorComplex, self).__init__()
             self.ngpu = ngpu
+            self.dim_z = nz
+            self.shift_in_w_space = False
+
             self.main = nn.Sequential(
                 # input is Z, going into a convolution
                 nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
@@ -66,9 +68,8 @@ def get_generator(nz):
     return GeneratorComplex(ngpu).to(device)
 
 
-def get_discriminator():
+def get_discriminator(ngpu):
     ndf = 64
-    ngpu = 1
     device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
     nc = 1
 

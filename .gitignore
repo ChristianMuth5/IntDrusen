@@ -1,6 +1,8 @@
 Data/
 stylegan3/
+GANLatentDiscovery/
 WarpedGANSpace/
+PDETraversal/
 dnnlib/
 torch_utils/
 __pycache__/

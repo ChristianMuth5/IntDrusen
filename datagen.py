@@ -10,7 +10,8 @@ import numpy as np
 import glob
 import torch
 import torch.nn as nn
-from scipy.ndimage import label, center_of_mass, binary_erosion, gaussian_filter, median_filter
+from scipy.ndimage import label, center_of_mass, binary_erosion, gaussian_filter, median_filter, binary_dilation
+from scipy.signal import find_peaks
 from torch.autograd import Variable
 import logging
 import functions
@@ -18,6 +19,9 @@ import subprocess
 import multiprocessing as mp
 from functools import partial
 import shutil
+import json
+
+from utils import normalize_info
 
 
 # FFDNet Models
@@ -173,12 +177,22 @@ def get_drusen_folder(run):
     minimum_drusen_height = dataset["minimum_drusen_height"]
     remove_below_line = dataset["remove_below_line"]
     rectify = dataset["rectify"]
+    watershed = dataset["watershed"]
 
     target_dir = f"{data_src}_{target_image_size}_{minimum_drusen_height}"
     if remove_below_line:
         target_dir += "_RBL"
     if rectify:
         target_dir += "_rect"
+    if watershed > -1:
+        target_dir += f"_w{watershed:02d}"
+
+    if dataset["single_drusen"]:
+        target_dir += "_s"
+    else:
+        target_dir += "_m"
+    if "scaling" in dataset:
+        target_dir += f"_s={dataset['scaling']}"
     return os.path.join("Data", target_dir, "1")
 
 
@@ -197,19 +211,16 @@ def rbl(im, ind):
 def move_down(im, line):
     shift_values = np.max(line) - line
     shifted_im = np.zeros_like(im)
-    #shifted_im[(slice(None), np.arange(im.shape[1]))] = im[(shift_values, np.arange(im.shape[1]))]
+    # shifted_im[(slice(None), np.arange(im.shape[1]))] = im[(shift_values, np.arange(im.shape[1]))]
     for col in range(im.shape[1]):
         shifted_im[:, col] = np.roll(im[:, col], shift_values[col])
     return shifted_im
 
 
-def process_scan(data, i, erosion_kernel_width, min_pixels_threshold,
-                 target_image_size, target_dir, remove_below_line, target_filename, method, is_duke, rectify):
-
-    # Original line
-    line = np.asarray(data.layers["BM_2c41ukad" if is_duke else "BM"].data[i])
-    # Remove nans from line
-    nan_indices = np.argwhere(np.isnan(line)).ravel()
+# Remove nans from line
+def remove_nans_from_line(line):
+    line_temp = line.copy()
+    nan_indices = np.argwhere(np.isnan(line_temp)).ravel()
     if len(nan_indices) > 0:
         is_at_start = nan_indices[0] == 0
         last = 0
@@ -220,11 +231,46 @@ def process_scan(data, i, erosion_kernel_width, min_pixels_threshold,
                 else:
                     break
         for index in nan_indices[last:]:
-            line[index] = line[index - 1]
+            line_temp[index] = line_temp[index - 1]
         while last > 0:
-            line[last - 1] = line[last]
+            line_temp[last - 1] = line_temp[last]
             last -= 1
-    line = line.astype(int)
+    return line_temp
+
+
+def segment_drusen(watershed, scan, minimum_drusen_height, erosion_kernel_width):
+    # Split the scan segmentation via watershedding or just erosion
+    if watershed > -1:
+        # rpe_line = np.asarray(data.layers["RPE" if is_duke else "RPE_2c41ukad"].data[i])
+        # rpe_line = remove_nans_from_line(rpe_line)
+        # rpe_line = smooth_line - rpe_line
+        # rpe_line[np.sum(scan, axis=0) == 0] = 0
+        scan = scan.astype(int)
+        rpe_line = np.sum(scan, axis=0)
+        peaks, _ = find_peaks(rpe_line, distance=watershed, height=minimum_drusen_height - 2)
+        if len(peaks) <= 1:  # no drusen or only one
+            return scan
+
+        seps = []
+        p = peaks[0]
+        for peak_i in range(1, len(peaks)):
+            n = peaks[peak_i]
+            min_i = p + np.argmin(rpe_line[p:n])
+            if rpe_line[min_i] > 0:
+                seps.append(min_i)
+            p = n
+        for sep in seps:
+            scan[:, sep] = 0
+    else:
+        scan = binary_erosion(scan, iterations=1, structure=np.ones((erosion_kernel_width, erosion_kernel_width)))
+    return scan
+
+
+def process_scan(data, i, erosion_kernel_width, min_pixels_threshold, target_image_size, target_dir, remove_below_line,
+                 target_filename, method, is_duke, rectify, watershed, minimum_drusen_height, single_drusen):
+    # Original line
+    line = np.asarray(data.layers["BM" if is_duke else "BM_2c41ukad"].data[i])
+    line = remove_nans_from_line(line).astype(int)
 
     # Compute smooth line
     smooth_line = gaussian_filter(line, sigma=5)  # 5 seems to be good, 10 is not smoother
@@ -235,17 +281,21 @@ def process_scan(data, i, erosion_kernel_width, min_pixels_threshold,
         im[smooth_line, np.arange(im.shape[1])] = np.array([0, 255, 0], dtype=int)
 
     if rectify:
-        #filepath = os.path.join(target_dir, f"{target_filename}_scan{i:02d}.png")
-        #cv2.imwrite(filepath, im)
+        # filepath = os.path.join(target_dir, f"{target_filename}_scan{i:02d}.png")
+        # cv2.imwrite(filepath, im)
         im = move_down(im, smooth_line)
-        #filepath = os.path.join(target_dir, f"{target_filename}_scan{i:02d}_.png")
-        #cv2.imwrite(filepath, im)
+        # filepath = os.path.join(target_dir, f"{target_filename}_scan{i:02d}_.png")
+        # cv2.imwrite(filepath, im)
 
     # Drusen calculation
+    # Get the segmentation for drusen
     scan = data.volume_maps["drusen"].data[i]
     if rectify:
         scan = move_down(scan, smooth_line)
-    scan = binary_erosion(scan, iterations=1, structure=np.ones((erosion_kernel_width, erosion_kernel_width)))
+
+    # Segment the drusen
+    scan = segment_drusen(watershed, scan, minimum_drusen_height, erosion_kernel_width)
+
     # Calculate the connected components
     labeled_scan, num_drusen = label(scan)
     # Calculate the center of each cluster that is large enough
@@ -254,22 +304,31 @@ def process_scan(data, i, erosion_kernel_width, min_pixels_threshold,
         if np.count_nonzero(labeled_scan == drusen_id) < min_pixels_threshold:
             continue
         cluster_center = center_of_mass(scan, labeled_scan, drusen_id)
-        centers.append((int(cluster_center[0]), int(cluster_center[1])))
-    if not centers:
-        return
+        centers.append((int(cluster_center[0]), int(cluster_center[1]), int(drusen_id)))
 
     # Creating patches
     height, width = scan.shape
-    for j, (row, col) in enumerate(centers):
-        # Calculate start and end values for row indices
+    info_dict = dict()
+    hs = []
+    ws = []
+    vs = []
+    for j, (row, col, drusen_id) in enumerate(centers):
         start_row = row - target_image_size // 2
         end_row = start_row + target_image_size
 
-        # Check and adjust for boundary cases
+        # 81.944 drusen gesamt
+        # 74.370 wenn alle deren rechteck über irgendeinen Rand geht wegrechnet
+        # 74.420 wenn alle deren rechteck links oder rechts über den Rand get wegrechnet
+        # 81.893 wenn alle deren rechteck oben oder unten über den Rand gehen wegrechnet
+
+        # Calculate start and end values for row indices
+        row_offset = 0
         if start_row < 0:
+            row_offset = start_row
             start_row = 0
             end_row = target_image_size
         elif end_row > height:
+            row_offset = end_row - height
             start_row = height - target_image_size
             end_row = height
 
@@ -277,11 +336,13 @@ def process_scan(data, i, erosion_kernel_width, min_pixels_threshold,
         start_col = col - target_image_size // 2
         end_col = start_col + target_image_size
 
-        # Check and adjust for boundary cases
+        col_offset = 0
         if start_col < 0:
+            col_offset = start_col
             start_col = 0
             end_col = target_image_size
         elif end_col > width:
+            col_offset = end_col - width
             start_col = width - target_image_size
             end_col = width
 
@@ -292,18 +353,84 @@ def process_scan(data, i, erosion_kernel_width, min_pixels_threshold,
             start_row -= diff
             start_row += 64  # Make it rectangular
 
-        filepath = os.path.join(target_dir, f"{target_filename}_scan{i:02d}_drusen{j:02d}.png")
-
         if method == 6:
             to_save = im[start_row:end_row, start_col:end_col, :]  # numpy ndarray (128,128, 3)
         else:
             to_save = im[start_row:end_row, start_col:end_col]  # numpy ndarray (128,128)
 
+        scan_temp = np.zeros_like(scan)
+        scan_temp[labeled_scan == drusen_id] = 1
+
+        # Calculate the information for this drusen
+        h = int(np.max(np.sum(scan_temp, axis=0)))
+        w = np.sum(scan_temp, axis=1)
+        w = int(np.median(w[w > 0]))
+        v = int(np.sum(scan_temp))
+        if v < 100:
+            v = 0
+        elif v < 300:
+            v = 1
+        elif v < 600:
+            v = 2
+        elif v < 1500:
+            v = 3
+        else:
+            v = 4
+
+        if v == 4020:
+            np.save(os.path.join("Data", "interesting_arr.npy"), scan_temp)
+
+        fname = f"{target_filename}_scan{i:02d}_drusen{j:02d}.png"
+        filepath = os.path.join(target_dir, fname)
+
+        # Move the drusen to the center or skip if it would create a straight like border region
+        if single_drusen:
+            scan_temp = scan_temp[start_row:end_row, start_col:end_col]
+            scan_temp = binary_dilation(scan_temp, iterations=3, structure=np.ones((11, 11)))
+            scan_temp = gaussian_filter(scan_temp.astype(float), sigma=5)
+            scan_temp[labeled_scan[start_row:end_row, start_col:end_col] == drusen_id] = 1
+            to_save = to_save * scan_temp
+
+            if row_offset or col_offset:
+                diff = np.sum(to_save[:, -1]) + np.sum(to_save[:, 0])
+                if diff > 100:  # from 81.944 to 79.532, so only about 3% of data lost
+                    continue
+                to_save = np.roll(to_save, (-row_offset, -col_offset))
+                if col_offset < 0:
+                    to_save[:, :-col_offset] = 0
+                elif col_offset > 0:
+                    to_save[:, width-col_offset:] = 0
+                if row_offset < 0:
+                    to_save[:-row_offset, :] = 0
+                elif row_offset > 0:
+                    to_save[height-row_offset:, :] = 0
+
+            if np.sum(to_save) < 100000:  # from 79.532 to 79.131, so only about 0.5% of data lost
+                continue
+
+            temp = (to_save > 0.9 * np.max(to_save)) * 1
+            has_ones = np.argmax(temp == 1, axis=0) > 0
+            vals = np.argmax(temp, axis=0)[has_ones]
+
+            # they seem to be extreme cases for the most part, from 79.131 to 78.974, so only about 0.2% of data lost
+            if len(vals) < 2:
+                continue
+            if np.min(vals[[0, -1]]) < 32:  # from 78.974 to 74.143, so about 6% of data lost
+                continue
+
         cv2.imwrite(filepath, to_save)
+
+        # Save the information for this drusen
+        info_dict[fname] = (h, w, v)
+        hs.append(h)
+        ws.append(w)
+        vs.append(v)
+
+    return info_dict, hs, ws, vs
 
 
 def process_file(filename, file_regex, minimum_drusen_height, erosion_kernel_width, min_pixels_threshold,
-                 target_image_size, target_dir, remove_below_line, method, is_duke, rectify):
+                 target_image_size, target_dir, remove_below_line, method, is_duke, rectify, watershed, single_drusen):
     target_filename = os.path.split(filename)[-1][:-len(file_regex) + 1]
 
     # Get eroded data
@@ -311,9 +438,27 @@ def process_file(filename, file_regex, minimum_drusen_height, erosion_kernel_wid
     drusen5 = ep.drusen(data.layers["RPE"].data, data.layers["BM"].data, data.shape,
                         minimum_height=minimum_drusen_height)
     data.add_pixel_annotation(drusen5, name="drusen5")
+
+    info_dict = dict()
+    hs = []
+    ws = []
+    vs = []
     for i in range(len(data)):
-        process_scan(data, i, erosion_kernel_width, min_pixels_threshold,
-                     target_image_size, target_dir, remove_below_line, target_filename, method, is_duke, rectify)
+        a, b, c, d = process_scan(data, i, erosion_kernel_width, min_pixels_threshold, target_image_size, target_dir,
+                               remove_below_line, target_filename, method, is_duke, rectify, watershed,
+                               minimum_drusen_height, single_drusen)
+        info_dict.update(a)
+        hs.extend(b)
+        ws.extend(c)
+        vs.extend(d)
+
+    # Save info_dict
+    fname = os.path.join(target_dir, os.pardir, "temp", f"{target_filename}.json")
+    with open(fname, "w") as f:
+        json.dump(info_dict, f)
+    # Save h and w values
+    fname = os.path.join(target_dir, os.pardir, "temp", f"{target_filename}.npy")
+    np.save(fname, np.asarray([hs, ws, vs]))
     return
 
 
@@ -349,7 +494,6 @@ def filter_file(filepath, method, target_dir, gauss_sigma):
 
 
 def generate(run, target_dir, method):
-
     # Only raw drusen should be generated
     if method == 0:
         generate_drusen(run, method)
@@ -405,6 +549,8 @@ def generate_drusen(run, method):
     remove_below_line = dataset["remove_below_line"]
     minimum_drusen_height = dataset["minimum_drusen_height"]
     rectify = dataset["rectify"]
+    watershed = dataset["watershed"]
+    single_drusen = dataset["single_drusen"]
 
     target_dir = get_drusen_folder(run)
     if method == 6:
@@ -412,6 +558,7 @@ def generate_drusen(run, method):
         if os.path.exists(target_dir):  # redo if it already exists
             shutil.rmtree(target_dir)
     os.makedirs(target_dir)
+    os.makedirs(os.path.join(target_dir, os.pardir, "temp"))
 
     is_duke = dataset["data_source"] == "Duke"
 
@@ -426,11 +573,14 @@ def generate_drusen(run, method):
                                    min_pixels_threshold=min_pixels_threshold,
                                    target_image_size=target_image_size,
                                    target_dir=target_dir, remove_below_line=remove_below_line, method=method,
-                                   is_duke=is_duke, rectify=rectify)
+                                   is_duke=is_duke, rectify=rectify, watershed=watershed, single_drusen=single_drusen)
     pool.map(partial_process_item, files)
 
     pool.close()
     pool.join()
+
+    scale = dataset["scaling"] if "scaling" in dataset else None
+    normalize_info(os.path.join(target_dir, os.pardir), scale)
 
 
 # generates the data
@@ -442,6 +592,7 @@ def gen_data(run, logger: logging.Logger):
     remove_below_line = dataset["remove_below_line"]
     minimum_drusen_height = dataset["minimum_drusen_height"]
     rectify = dataset["rectify"]
+    watershed = dataset["watershed"]
 
     is_for_stylegan = run["model"]["train_method"] == "StyleGAN"
 
@@ -452,6 +603,14 @@ def gen_data(run, logger: logging.Logger):
         target_dir += "_RBL"
     if rectify:
         target_dir += "_rect"
+    if watershed > -1:
+        target_dir += f"_w{watershed:02d}"
+    if dataset["single_drusen"]:
+        target_dir += "_s"
+    else:
+        target_dir += "_m"
+    if "scaling" in dataset:
+        target_dir += f"_s={dataset['scaling']}"
     if noise_method.startswith("Gauss"):
         method = 1
         gauss_sigma = get_gauss_sigma(run)
@@ -472,7 +631,6 @@ def gen_data(run, logger: logging.Logger):
     if noise_method == "overview":
         method = 6
         target_dir = target_dir + "_ov"
-
 
     target_dir = os.path.join("Data", target_dir)
     run["dataroot"] = target_dir
