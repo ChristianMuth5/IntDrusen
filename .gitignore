@@ -7,3 +7,4 @@ dnnlib/
 torch_utils/
 __pycache__/
 .idea/
+experiments/
