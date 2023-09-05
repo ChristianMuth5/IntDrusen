@@ -173,7 +173,7 @@ def main():
 
     R = Reconstructor(reconstructor_type=args.reconstructor_type,
                       dim=S.num_support_sets,
-                      channels=1 if args.gan_type in ['SNGAN_MNIST', 'GAN128', 'StyleGAN3'] else 3)
+                      channels=1 if args.gan_type in ['SNGAN_MNIST', 'GAN128', 'StyleGAN3', 'StyleGAN2'] else 3)
 
     # Count number of trainable parameters
     print("  \\__Trainable parameters: {:,}".format(sum(p.numel() for p in R.parameters() if p.requires_grad)))

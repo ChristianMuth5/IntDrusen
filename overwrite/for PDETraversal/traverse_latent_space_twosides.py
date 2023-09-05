@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw
 import json
 from torchvision.transforms import ToPILImage
 from lib import *
-from models.gan_load import build_biggan, build_proggan, build_stylegan2, build_sngan, build_gan128
+from models.gan_load import build_biggan, build_proggan, build_stylegan2, build_sngan, build_gan128, build_stylegan3
 import numpy as np
 
 def text_save(filename, data):
@@ -53,6 +53,10 @@ def build_gan(gan_type, target_classes, stylegan2_resolution, shift_in_w_space, 
     # === GAN128 ===
     if gan_type == 'GAN128':
         G = build_gan128(pretrained_gan_weights=GAN_WEIGHTS[gan_type]['weights'][GAN_RESOLUTIONS[gan_type]], nz=20)
+    # === StyleGAN3 ===
+    elif gan_type == 'StyleGAN3':
+        G = build_stylegan3(pretrained_gan_weights=GAN_WEIGHTS[gan_type]['weights'][GAN_RESOLUTIONS[gan_type]],
+                            shift_in_w_space=shift_in_w_space)
     # -- BigGAN
     elif gan_type == 'BigGAN':
         G = build_biggan(pretrained_gan_weights=GAN_WEIGHTS[gan_type]['weights'][GAN_RESOLUTIONS[gan_type]],
@@ -264,7 +268,7 @@ def main():
         print("  \\__GAN type: {}".format(gan_type))
         print("  \\__Pre-trained weights: {}".format(
             GAN_WEIGHTS[gan_type]['weights'][args_json.__dict__["stylegan2_resolution"]]
-            if gan_type == 'StyleGAN2' else GAN_WEIGHTS[gan_type]['weights'][GAN_RESOLUTIONS[gan_type]]))
+            if gan_type in ['StyleGAN2', 'StyleGAN3'] else GAN_WEIGHTS[gan_type]['weights'][GAN_RESOLUTIONS[gan_type]]))
 
     G = build_gan(gan_type=gan_type,
                   target_classes=args_json.__dict__["biggan_target_classes"],
@@ -281,7 +285,7 @@ def main():
                     num_support_timesteps=args_json.__dict__["num_support_timesteps"],
                     support_vectors_dim=G.dim_z)
     #For stylegan remove the last activation layer otherwise the changes are too small
-    if gan_type == 'StyleGAN2':
+    if gan_type in ['StyleGAN2', 'StyleGAN3']:
         for i in range(S.num_support_sets):
             S.MLP_SET[i].activation4 = nn.Identity()
     # Load pre-trained weights and set to evaluation mode

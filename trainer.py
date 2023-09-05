@@ -256,7 +256,8 @@ def train_own_model(run, folder_out, logger: logging.Logger):
     # Save G and D every x-th epoch
     save_networks_every_epoch = num_epochs // 5
     # Learning rate for optimizers
-    lr = 0.0002
+    lr_G = 0.0002
+    lr_D = 0.0001
     # Beta1 hyperparam for Adam optimizers
     beta1 = 0.5
     # Batch size during training
@@ -328,8 +329,8 @@ def train_own_model(run, folder_out, logger: logging.Logger):
         fake_label = 0.
 
         # Setup Adam optimizers for both G and D
-        optimizerD = optim.Adam(netD.parameters(), lr=lr, betas=(beta1, 0.999))
-        optimizerG = optim.Adam(netG.parameters(), lr=lr, betas=(beta1, 0.999))
+        optimizerD = optim.Adam(netD.parameters(), lr=lr_D, betas=(beta1, 0.999))
+        optimizerG = optim.Adam(netG.parameters(), lr=lr_G, betas=(beta1, 0.999))
 
         # Lists to keep track of progress
         img_list = []
@@ -543,6 +544,7 @@ def train_stylegan(run, folder_out, logger: logging.Logger):
         sys.path.append(tu_path)
     if dnnlib_path not in sys.path:
         sys.path.append(dnnlib_path)
+    os.environ["CUDA_HOME"] = "/home/christian/cuda"
 
     dataroot = run["dataroot"]
     model_param = run["model"]
@@ -552,7 +554,7 @@ def train_stylegan(run, folder_out, logger: logging.Logger):
     settings = model_param["StyleGAN_Settings"]
     path_to_g = get_matching_stylegan(folder_out, settings, datafolder_name)
 
-    if path_to_g:
+    if path_to_g and path_to_g is not None:
         logger.info("Already trained with these settings")
     else:
         filename = os.path.join("stylegan3", "train.py")
@@ -573,9 +575,9 @@ def train_stylegan(run, folder_out, logger: logging.Logger):
             cmd += ["--snap=" + str(model_param["num_epochs"] // 20)]
 
         logger.debug(f"Command: {cmd}")
-        logger.info("Start training StyleGAN")
+        logger.info(f"Start training {model_param['train_method']}")
         subprocess.run(cmd)
-        logger.info("Finished training StyleGAN")
+        logger.info(f"Finished training {model_param['train_method']}")
         path_to_g = get_matching_stylegan(folder_out, settings, datafolder_name)
 
     with open(path_to_g, 'rb') as f:
@@ -596,10 +598,11 @@ def train(run, logger: logging.Logger):
     num_epochs = model_param["num_epochs"]
     train_method = model_param["train_method"]
     augmented = model_param["augment_data"]
-    latent_size = model_param["latent_size"]
-    mix = model_param["mix"] if not train_method == "StyleGAN" else False
-    loss = model_param["loss"] if not train_method == "StyleGAN" else None
-    conditions = model_param["conditions"] if not train_method == "StyleGAN" else []
+    is_stylegan = train_method in ["StyleGAN2", "StyleGAN3"]
+    latent_size = model_param["latent_size"] if not is_stylegan else None
+    mix = model_param["mix"] if not is_stylegan else False
+    loss = model_param["loss"] if not is_stylegan else None
+    conditions = model_param["conditions"] if not is_stylegan else []
     dataroot = run["dataroot"]
     weight_samples = model_param["weight_samples"] if "weight_samples" in model_param else False
 
@@ -621,7 +624,9 @@ def train(run, logger: logging.Logger):
         folder_out += "v"
     if weight_samples:
         folder_out += "_ws"
-    folder_out += f"_results_{train_method}_{num_epochs}epochs_{latent_size}nz"
+    folder_out += f"_results_{train_method}_{num_epochs}epochs"
+    if not is_stylegan:
+        folder_out += f"_{latent_size}nz"
     os.makedirs(folder_out, exist_ok=True)  # General output folder
 
     # Init the logger
@@ -640,7 +645,7 @@ def train(run, logger: logging.Logger):
         close_logger()
         return G, folder_out
 
-    if train_method == "StyleGAN":
+    if is_stylegan:
         G, folder_out = train_stylegan(run, folder_out, logger)
         close_logger()
         return G, folder_out

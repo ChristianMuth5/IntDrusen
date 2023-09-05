@@ -2,6 +2,9 @@ import glob
 import os
 import json
 import shutil
+import pickle
+import importlib.util
+import torch
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -9,6 +12,19 @@ import matplotlib.image as mpimg
 import multiprocessing as mp
 from functools import partial
 from skimage.exposure import match_histograms
+from torchvision.transforms import ToPILImage
+
+
+# From WarpedGANSpace - sample_gan.py
+def tensor2image(tensor, adaptive=False):
+    tensor = tensor.squeeze(dim=0)
+    if adaptive:
+        tensor = (tensor - tensor.min()) / (tensor.max() - tensor.min())
+        return ToPILImage()((255 * tensor.cpu().detach()).to(torch.uint8))
+    else:
+        tensor = (tensor + 1) / 2
+        tensor.clamp(0, 1)
+        return ToPILImage()((255 * tensor.cpu().detach()).to(torch.uint8))
 
 
 def normalize_info(target_dir, scaling=1):
@@ -101,11 +117,14 @@ def show_all_drusen(folder):
     os.makedirs(out_dir, exist_ok=True)
 
     files = glob.glob(os.path.join(folder, "1", "*"))
-    arr = np.zeros((len(files), 64, 128))
-    for i in range(len(files)):
-        arr[i] = Image.open(files[i])
-    sums = np.sum(arr, axis=(1, 2))
+    #arr = np.zeros((len(files), 64, 128))
+    #for i in range(len(files)):
+    #    arr[i] = Image.open(files[i])
+    #sums = np.sum(arr, axis=(1, 2))
+    sums = np.asarray([int(os.path.split(x)[1].split('_')[-1].split('.')[0]) for x in files])
     indices = np.argsort(sums)
+    #print(np.unique(sums))
+    #return
 
     indices = [indices[i:min(i+50, len(indices))] for i in range(0, len(indices), 50)]
 
@@ -202,13 +221,62 @@ def show_hist_for_dict(file):
         plt.savefig(os.path.join(os.path.split(file)[0], "hist_final.jpg"))
         plt.close()
 
+
+def gen_drusen(folder, num):
+    folder = os.path.join("Data", folder)
+    batch_size = 32
+    is_stylegan = 'StyleGAN' in os.path.split(folder)[1]
+    if is_stylegan:
+        os.environ["CUDA_HOME"] = "/home/christian/cuda"
+        path_to_g = sorted(glob.glob(os.path.join(folder, "*", "network-snapshot-*.pkl")))[-1]
+        with open(path_to_g, 'rb') as f:
+            G = pickle.load(f)['G_ema'].cuda()
+        nz = 512
+    else:
+        module_spec = importlib.util.spec_from_file_location("model", os.path.join(folder, "model.py"))
+        module = importlib.util.module_from_spec(module_spec)
+        module_spec.loader.exec_module(module)
+        G = module.get_generator(1, 20)
+        G.load_state_dict(torch.load(os.path.join(folder, "generator.pt")))
+        G.eval()
+        nz = int(os.path.split(folder)[1].split('_')[-1][:-2])
+
+    drusen_folder = os.path.join(folder, "drusen")
+    os.makedirs(drusen_folder, exist_ok=True)
+    batches = [min(j+32, num)-j for j in range(0, num, 32)]
+    drusen_is = [int(os.path.split(x)[1].split("_")[-1].split(".")[0]) for x in glob.glob(os.path.join(drusen_folder, "*"))]
+    drusen_i = 0 if len(drusen_is) == 0 else max(drusen_is)+1
+    for batch in batches:
+        noise = torch.randn(batch, nz)
+        imgs = G(noise.cuda(), None) if is_stylegan else G(noise.cuda())
+        for i in range(len(noise)):
+            torch.save(noise[i], os.path.join(drusen_folder, f"latent_code_{drusen_i}.pt"))
+            img_pil = tensor2image(imgs[i], adaptive=True)
+            img_pil.save(os.path.join(drusen_folder, f'image_{drusen_i}.jpg'), "JPEG", quality=95, optimize=True, progressive=True)
+            drusen_i += 1
+
+
+
 def main():
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     # normalize_info(os.path.join("Data", "Bonn_128_5_rect_w10_s (copy)"))
-    # show_all_drusen(os.path.join("Data", "Bonn_128_5_rect_w10_s"))
+    #show_all_drusen(os.path.join("Data", "Bonn_128_5_rect_w20_s"))
+    #show_all_drusen(os.path.join("Data", "Bonn_128_5_rect_w20_m"))
+    #show_all_drusen(os.path.join("Data", "Bonn_128_5_rect_w10_s"))
+    #show_all_drusen(os.path.join("Data", "Bonn_128_5_rect_w10_m"))
     # show_scalings(os.path.join("Data", "Bonn_128_5_rect_w10_s"))
     # show_modified_histograms(os.path.join("Data", "Bonn_128_5_rect_w10_s"))
     # show_hist_for_dict(os.path.join("Data", "Bonn_128_5_rect_w10_s (copy)", "info_dict.json"))
-    show_modified_histograms(os.path.join("Data", "Bonn_128_5_rect_w11_s"))
+    # show_modified_histograms(os.path.join("Data", "Bonn_128_5_rect_w11_s"))
+    num = 250
+    folders = ["Bonn_128_5_rect_w20_s_aug_bce_ws_results_GAN_100epochs_20nz",
+               "Bonn_128_5_rect_w20_m_aug_bce_ws_results_GAN_100epochs_20nz",
+               "Bonn_128_5_rect_w20_s_aug_bce_results_GAN_100epochs_20nz",
+               "Bonn_128_5_rect_w20_m_aug_bce_results_GAN_100epochs_20nz",
+               "Bonn_128_5_rect_w10_s_aug_results_StyleGAN2_2000epochs",
+               "Bonn_128_5_rect_w10_m_aug_results_StyleGAN2_2000epochs"]
+    for folder in folders:
+        gen_drusen(folder, num)
 
 
 

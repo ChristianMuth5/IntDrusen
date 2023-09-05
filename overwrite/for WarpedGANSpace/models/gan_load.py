@@ -140,8 +140,8 @@ class StyleGAN2Wrapper(nn.Module):
         super(StyleGAN2Wrapper, self).__init__()
         self.G = G
         self.shift_in_w_space = shift_in_w_space
-        self.dim_z = 512
-        self.dim_w = self.G.style_dim if self.shift_in_w_space else self.dim_z
+        self.dim_z = G.z_dim
+        self.dim_w = G.w_dim if self.shift_in_w_space else self.dim_z
 
     def get_w(self, z):
         """Return batch of w latent codes given a batch of z latent codes.
@@ -153,7 +153,7 @@ class StyleGAN2Wrapper(nn.Module):
             w (torch.Tensor) : W-space latent code of size [batch_size, 512]
 
         """
-        return self.G.get_latent(z)
+        return map(self.G.mapping(z, None, truncation_psi=0.5, truncation_cutoff=8))
 
     def forward(self, z, shift=None, latent_is_w=False):
         """StyleGAN2 generator forward function.
@@ -167,24 +167,36 @@ class StyleGAN2Wrapper(nn.Module):
             I (torch.Tensor)     : Output images of size [batch_size, 3, resolution, resolution]
         """
         # The given latent codes lie on Z- or W-space, while the given shifts lie on the W-space
+        out = None
         if self.shift_in_w_space:
+            w = None
             if latent_is_w:
                 # Input latent code is in W-space
-                return self.G([z if shift is None else z + shift], input_is_latent=True)[0]
+                w = z if shift is None else z + shift
             else:
                 # Input latent code is in Z-space -- get w code first
-                w = self.G.get_latent(z)
-                return self.G([w if shift is None else w + shift], input_is_latent=True)[0]
+                w = map(self.G.mapping(z, None, truncation_psi=0.5, truncation_cutoff=8))
+                w = w if shift is None else w + shift
+            # print(w.shape)
+            w = w.unsqueeze(dim=1).repeat(1, self.G.num_ws, 1)
+            # print(w.shape)
+            out = self.G.synthesis(w, noise_mode='const', force_fp32=True)
+            out = torch.index_select(out, 1, torch.tensor([0]))
         # The given latent codes and shift vectors lie on the Z-space
         else:
-            return self.G([z if shift is None else z + shift], input_is_latent=False)[0]
+            out = self.G(z if shift is None else z + shift, None)
+        return out
 
 
 def build_stylegan2(pretrained_gan_weights, resolution, shift_in_w_space=False):
-    # Build StyleGAN2 generator model
-    G = StyleGAN2Generator(resolution, 512, 8)
-    # Load pre-trained weights
-    G.load_state_dict(torch.load(pretrained_gan_weights)['g_ema'], strict=False)
+    if pretrained_gan_weights.endswith(".pt"):
+        # Build StyleGAN2 generator model
+        G = StyleGAN2Generator(resolution, 512, 8)
+        # Load pre-trained weights
+        G.load_state_dict(torch.load(pretrained_gan_weights)['g_ema'], strict=False)
+    else:
+        with open(pretrained_gan_weights, 'rb') as f:
+            G = pickle.load(f)['G_ema'].cuda()
 
     return StyleGAN2Wrapper(G, shift_in_w_space=shift_in_w_space)
 

@@ -7,6 +7,8 @@ from matplotlib.animation import FuncAnimation
 import multiprocessing as mp
 from functools import partial
 from PIL import Image
+from scipy.stats import chi2
+import torch
 
 
 def fig2image(fig):
@@ -16,6 +18,15 @@ def fig2image(fig):
     #im = Image.fromarray(np.frombuffer(fig.canvas.buffer_rgba(), dtype=np.uint8).reshape((h, w, 4)))
     plt.close()
     return im
+
+
+def get_chi_squ(drusen_folder, path_i, image_in_path_i):
+    lc = torch.load(os.path.join(drusen_folder, "paths_latent_codes.pt"), map_location=lambda storage, loc: storage)
+    i = image_in_path_i if image_in_path_i > -1 else lc.shape[1]//2  # Take middle druse if -1
+    lc = lc[path_i][i].detach().numpy()  # lc is tensor of size 20
+    c = chi2(int(lc.shape[0]))  # Degrees of freedom set to k, as we are not estimating loc or scale
+    # We can use x² because mu=0, std=1, so (x-mu)^T * S^-1 * (x-mu) = x^T * S * x = x^T * x
+    return f"{1-c.cdf(np.linalg.norm(lc)**2):.03f}"
 
 
 def show_10paths_for_5drusen(data):
@@ -29,24 +40,26 @@ def show_10paths_for_5drusen(data):
         for i in range(5):
             plt_row = i
             drusen_index = drusen_indices[i]
+            drusen_folder = drusen[drusen_index]
 
             # original druse
-            druse = glob.glob(os.path.join(drusen[drusen_index], "original_image.jpg"))[0]
+            druse = glob.glob(os.path.join(drusen_folder, "original_image.jpg"))[0]
             image = mpimg.imread(druse)
             ax = axes[plt_row][0]
             ax.imshow(image, cmap='gray')
+            ax.set_title(f"Druse {drusen_index}, Ch2={get_chi_squ(drusen_folder, 0, -1)}")
             ax.axis('off')
 
             for path_i in range(10):
                 plt_col = path_i + 1
                 path_index = path_indices[path_i]
                 # path image
-                druse_path = sorted(glob.glob(os.path.join(drusen[drusen_index], "paths_images",
+                druse_path = sorted(glob.glob(os.path.join(drusen_folder, "paths_images",
                                                            f"path_{path_index:03d}", "*.jpg")))[path_image_i]
                 image = mpimg.imread(druse_path)
                 ax = axes[plt_row][plt_col]
                 ax.imshow(image, cmap='gray')
-                ax.set_title(f"Path {path_index:03d}")
+                ax.set_title(f"Path {path_index}, Ch2={get_chi_squ(drusen_folder, path_index, path_image_i)}")
                 ax.axis('off')
         plt.tight_layout()
         return fig2image(fig)
@@ -78,10 +91,13 @@ def show_20drusen_for_one_path(data):
 
             # original druse
             ax = axes[plt_row][plt_col]
+            drusen_index = drusen_indices[i]
+            drusen_folder = drusen[drusen_index]
             if i < len(drusen_indices):
-                druse = glob.glob(os.path.join(drusen[drusen_indices[i]], "original_image.jpg"))[0]
+                druse = glob.glob(os.path.join(drusen_folder, "original_image.jpg"))[0]
                 image = mpimg.imread(druse)
                 ax.imshow(image, cmap='gray')
+                ax.set_title(f"Druse {drusen_index}, Ch2={get_chi_squ(drusen_folder, 0, -1)}")
             ax.axis('off')
 
             # path image
@@ -91,6 +107,7 @@ def show_20drusen_for_one_path(data):
                 files = sorted(glob.glob(os.path.join(fn, "paths_images", f"path_{path_i:03d}", "*.jpg")))
                 druse_path = files[path_image_i]
                 image = mpimg.imread(druse_path)
+                ax.set_title(f"Path {path_i}, Ch2={get_chi_squ(drusen_folder, path_i, path_image_i)}")
                 ax.imshow(image, cmap='gray')
             ax.axis('off')
         # remove center line
@@ -169,13 +186,49 @@ def show_all_drusen(folder):
     #data = [[files[i:i+50] for i in range()]]
 
 
+def analyze_latent_codes(image_in_path_i = -1, path_i = 0):
+    fig, axes = plt.subplots(1, 3, figsize=(20, 10))
+    names = ["warp_z", "warp_w", "linear"]
+    for name_i in range(len(names)):
+        name = names[name_i]
+        print(name)
+        path = os.path.join("Data", "latent_vector_test", name + ".pt")
+        lc = torch.load(path, map_location=lambda storage, loc: storage)
+        if lc.shape[1] == 512:
+            lc = lc[0].detach().numpy()
+        else:
+            i = image_in_path_i if image_in_path_i > -1 else lc.shape[1]//2  # Take middle druse if -1
+            lc = lc[path_i][i].detach().numpy()  # lc is tensor of size 20
+        print("Shape:", lc.shape)
+        print("Norm:", np.linalg.norm(lc))
+        print("Abs Min:", np.min(np.abs(lc)))
+        print("Abs Max:", np.max(np.abs(lc)))
+        print("Abs Sum:", np.sum(np.abs(lc)))
+        c = chi2(int(lc.shape[0]))  # Degrees of freedom set to k, as we are not estimating loc or scale
+        # We can use x² because mu=0, std=1, so (x-mu)^T * S^-1 * (x-mu) = x^T * S * x = x^T * x
+        c_val = f"{1-c.cdf(np.linalg.norm(lc)**2):.03f}"
+        print("Chi Squared value:", c_val)
+        print()
+        ax = axes[name_i]
+        ax.hist(lc, bins=20, range=(-4, 4))
+        ax.set_title(f"{name}")
+    plt.savefig(os.path.join("Data", "latent_vector_test", "Comp.jpg"))
+    plt.close()
+
+def show_5paths_for_5drusen(data):
+    folder = data[0]
+    drusen_is = data[1]
+
+
+
 def main():
-    folder = os.path.join("Data", "Bonn_128_5_rect_w10_s_s=100_aug_bce_c=hw_results_GAN_200epochs_20nz_pde50000_20")
+    folder = os.path.join("Data", "Bonn_128_5_rect_w10_s_aug_bce_ws_results_GAN_200epochs_20nz_warp1000_20")
     #generate_gifs_warp(folder)
     #folder = os.path.join("Data", "Bonn_128_5_rect_w10_s_aug_bce_c=hw_results_GAN_200epochs_20nz_linear10000_ortho")
     #generate_gifs_linear(folder)
     #show_all_drusen(os.path.join("Data", "Bonn_128_5_rect_w05", "1"))
-    generate_gifs_warp(folder)
+    #generate_gifs_warp(folder)
+    analyze_latent_codes()
 
 
 if __name__ == "__main__":

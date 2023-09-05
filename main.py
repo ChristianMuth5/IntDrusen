@@ -83,24 +83,28 @@ def main():
     # if larger than 1 scale by the factor, will spread the values over [0,1]
     dataset_noise_s = {"data_source": "Bonn", "method": "noise", "remove_below_line": False, "image_size": 128,
                      "minimum_drusen_height": 5, "rectify": True, "watershed": 10, "single_drusen": True}
+    dataset_noise_s_20 = {"data_source": "Bonn", "method": "noise", "remove_below_line": False, "image_size": 128,
+                     "minimum_drusen_height": 5, "rectify": True, "watershed": 20, "single_drusen": True}
     dataset_noise_s_200 = {"data_source": "Bonn", "method": "noise", "remove_below_line": False, "image_size": 128,
-                       "minimum_drusen_height": 5, "rectify": True, "watershed": 10, "single_drusen": True,
+                       "minimum_drusen_height": 5, "rectify": True, "watershed": 20, "single_drusen": True,
                        "scaling": 200}
     dataset_noise_s_1 = {"data_source": "Bonn", "method": "noise", "remove_below_line": False, "image_size": 128,
-                       "minimum_drusen_height": 5, "rectify": True, "watershed": 10, "single_drusen": True,
+                       "minimum_drusen_height": 5, "rectify": True, "watershed": 20, "single_drusen": True,
                        "scaling": 1}
     dataset_noise_m = {"data_source": "Bonn", "method": "noise", "remove_below_line": False, "image_size": 128,
                      "minimum_drusen_height": 5, "rectify": True, "watershed": 10, "single_drusen": False}
+    dataset_noise_m_20 = {"data_source": "Bonn", "method": "noise", "remove_below_line": False, "image_size": 128,
+                     "minimum_drusen_height": 5, "rectify": True, "watershed": 20, "single_drusen": False}
     dataset_ffdnet = {"data_source": "Bonn", "method": "FFDNet", "remove_below_line": False, "image_size": 128,
-                      "minimum_drusen_height": 5, "rectify": True, "watershed": 10, "single_drusen": True}
+                      "minimum_drusen_height": 5, "rectify": True, "watershed": 20, "single_drusen": True}
     dataset_gauss = {"data_source": "Bonn", "method": "Gauss2", "remove_below_line": False, "image_size": 128,
-                     "minimum_drusen_height": 5, "rectify": True, "watershed": 10, "single_drusen": True}
+                     "minimum_drusen_height": 5, "rectify": True, "watershed": 20, "single_drusen": True}
     dataset_bim = {"data_source": "Bonn", "method": "BiM", "remove_below_line": False, "image_size": 128,
-                   "minimum_drusen_height": 5, "rectify": True, "watershed": 10, "single_drusen": True}
+                   "minimum_drusen_height": 5, "rectify": True, "watershed": 20, "single_drusen": True}
     dataset_overview = {"data_source": "Bonn", "method": "overview", "remove_below_line": False, "image_size": 128,
-                        "minimum_drusen_height": 5, "rectify": True, "watershed": 10, "single_drusen": True}
+                        "minimum_drusen_height": 5, "rectify": True, "watershed": 20, "single_drusen": True}
     # dataset5 = {"data_source": "Duke", "method": "median", "remove_below_line": False, "image_size": 128,
-    #            "minimum_drusen_height": 5, "rectify": True, "watershed": 5, "single_drusen": True}
+    #            "minimum_drusen_height": 5, "rectify": True, "watershed": 20, "single_drusen": True}
 
     # Valid train_method values:
     # GAN, classic simple GAN architecture
@@ -134,8 +138,6 @@ def main():
                         "loss": "bce", "batch_size": 128, "conditions": []}
     model_gan_100_10 = {"train_method": "GAN", "num_epochs": 100, "latent_size": 10, "augment_data": True, "mix": False,
                         "loss": "bce", "batch_size": 128, "conditions": []}
-    model_gan_100_20 = {"train_method": "GAN", "num_epochs": 100, "latent_size": 20, "augment_data": True, "mix": False,
-                        "loss": "bce", "batch_size": 128, "conditions": []}
     model_gan_100_20_cond = {"train_method": "GAN", "num_epochs": 100, "latent_size": 20, "augment_data": True, "mix": False,
                         "loss": "bce", "batch_size": 128, "conditions": [2]}
     model_gan_200_10 = {"train_method": "GAN", "num_epochs": 200, "latent_size": 10, "augment_data": True, "mix": False,
@@ -152,6 +154,10 @@ def main():
                         "loss": "bce", "batch_size": 128, "conditions": [], "weight_samples": True}
     model_gan_200_20_ws = {"train_method": "GAN", "num_epochs": 200, "latent_size": 20, "augment_data": True, "mix": False,
                         "loss": "bce", "batch_size": 128, "conditions": [], "weight_samples": True}
+    model_gan_100_20_ws = {"train_method": "GAN", "num_epochs": 100, "latent_size": 20, "augment_data": True, "mix": False,
+                        "loss": "bce", "batch_size": 128, "conditions": [], "weight_samples": True}
+    model_gan_100_20 = {"train_method": "GAN", "num_epochs": 100, "latent_size": 20, "augment_data": True, "mix": False,
+                        "loss": "bce", "batch_size": 128, "conditions": [], "weight_samples": False}
     model_gan_200_20_mix_cond = {"train_method": "GAN", "num_epochs": 200, "latent_size": 20, "augment_data": True, "mix": True,
                         "loss": "bce", "batch_size": 128, "conditions": [2]}
 
@@ -162,34 +168,116 @@ def main():
     model_cgan_200_20_mix = {"train_method": "ComplexGAN", "num_epochs": 200, "latent_size": 20, "augment_data": True, "mix": True,
                         "loss": "bce", "batch_size": 128, "conditions": []}
 
-    model_stylegan_05 = {"train_method": "StyleGAN", "num_epochs": 5000, "augment_data": True,
+    model_stylegan3_05 = {"train_method": "StyleGAN3", "num_epochs": 5000, "augment_data": True,
                          "StyleGAN_Settings": "--cfg=stylegan3-r --gpus=1 --batch=32 --gamma=0.5 --cbase=16384",
                          "latent_size": 30}
-    model_stylegan_02 = {"train_method": "StyleGAN", "num_epochs": 500, "augment_data": True,
+    model_stylegan3_02 = {"train_method": "StyleGAN3", "num_epochs": 500, "augment_data": True,
                          "StyleGAN_Settings": "--cfg=stylegan3-r --gpus=1 --batch=32 --gamma=0.5 --cbase=16384",
+                         "latent_size": 10}
+    model_stylegan2 = {"train_method": "StyleGAN2", "num_epochs": 500, "augment_data": True,
+                         "StyleGAN_Settings": "--cfg=stylegan2 --gpus=1 --batch=32 --gamma=0.1024 --map-depth=2 --glr=0.0025 --dlr=0.0025 --cbase=16384",
+                         "latent_size": 10}
+    model_stylegan2_20 = {"train_method": "StyleGAN2", "num_epochs": 20, "augment_data": True,
+                         "StyleGAN_Settings": "--cfg=stylegan2 --gpus=1 --batch=32 --gamma=0.1024 --map-depth=2 --glr=0.0025 --dlr=0.0025 --cbase=16384",
+                         "latent_size": 10}
+    model_stylegan2_2000 = {"train_method": "StyleGAN2", "num_epochs": 2000, "augment_data": True,
+                         "StyleGAN_Settings": "--cfg=stylegan2 --gpus=1 --batch=32 --gamma=0.1024 --map-depth=2 --glr=0.0025 --dlr=0.0025 --cbase=16384",
                          "latent_size": 10}
 
     # Valid values for latent discovery
     # method: linear, warp, pde
     # latent_steps, around 100-200k seems to be fine
     # deformator_type: used for linear method
-    # directions: amount of directions, used for warp and pde
-    latent_linear_10k = {"method": "linear", "latent_steps": 10000, "deformator_type": "ORTHO"}
-    latent_linear_100k = {"method": "linear", "latent_steps": 100000, "deformator_type": "ORTHO"}
+    # directions: amount of directions
+    latent_linear_1k = {"method": "linear", "latent_steps": 1000, "deformator_type": "ORTHO", "directions": 20}
+    latent_linear_1k_w = {"method": "linear", "latent_steps": 1000, "deformator_type": "ORTHO", "directions": 20, "shift_in_w_space": True}
+    latent_linear_5k = {"method": "linear", "latent_steps": 5000, "deformator_type": "ORTHO", "directions": 20}
+    latent_linear_5k_w = {"method": "linear", "latent_steps": 5000, "deformator_type": "ORTHO", "directions": 20,
+                          "shift_in_w_space": True}
+    latent_linear_3k = {"method": "linear", "latent_steps": 3000, "deformator_type": "ORTHO", "directions": 20}
+    latent_linear_3k_w = {"method": "linear", "latent_steps": 3000, "deformator_type": "ORTHO", "directions": 20,
+                          "shift_in_w_space": True}
+    latent_linear_200_w = {"method": "linear", "latent_steps": 200, "deformator_type": "ORTHO", "directions": 20, "shift_in_w_space": True}
+    latent_linear_10k = {"method": "linear", "latent_steps": 10000, "deformator_type": "ORTHO", "directions": 20}
+    latent_linear_100k = {"method": "linear", "latent_steps": 100000, "deformator_type": "ORTHO", "directions": 20}
+    latent_linear_50k = {"method": "linear", "latent_steps": 50000, "deformator_type": "ORTHO", "directions": 20}
+    latent_warp_100 = {"method": "warp", "latent_steps": 100, "directions": 20}
+    latent_warp_100_w = {"method": "warp", "latent_steps": 100, "directions": 20, "shift_in_w_space": True}
     latent_warp_1k = {"method": "warp", "latent_steps": 1000, "directions": 20}
     latent_warp_10k = {"method": "warp", "latent_steps": 10000, "directions": 20}
+    latent_warp_10k_w = {"method": "warp", "latent_steps": 10000, "directions": 20, "shift_in_w_space": True}
+    latent_warp_5k_w = {"method": "warp", "latent_steps": 5000, "directions": 20, "shift_in_w_space": True}
+    latent_warp_5k = {"method": "warp", "latent_steps": 5000, "directions": 20}
+    latent_warp_100k_20 = {"method": "warp", "latent_steps": 100000, "directions": 20}
     latent_warp_200k_20 = {"method": "warp", "latent_steps": 200000, "directions": 20}
     latent_warp_200k_40 = {"method": "warp", "latent_steps": 200000, "directions": 40}
     latent_warp_200k_60 = {"method": "warp", "latent_steps": 200000, "directions": 60}
+    latent_pde_50_20 = {"method": "pde", "latent_steps": 50, "directions": 20}
+    latent_pde_50_20_w = {"method": "pde", "latent_steps": 50, "directions": 20, "shift_in_w_space": True}
     latent_pde_200_20 = {"method": "pde", "latent_steps": 200, "directions": 20}
     latent_pde_20k_20 = {"method": "pde", "latent_steps": 20000, "directions": 20}
     latent_pde_50k_20 = {"method": "pde", "latent_steps": 50000, "directions": 20}
+    latent_pde_5k_20 = {"method": "pde", "latent_steps": 5000, "directions": 20}
+    latent_pde_5k_20_w = {"method": "pde", "latent_steps": 5000, "directions": 20, "shift_in_w_space": True}
+    latent_pde_3k_20_w = {"method": "pde", "latent_steps": 3000, "directions": 20, "shift_in_w_space": True}
+    latent_pde_3k_20 = {"method": "pde", "latent_steps": 3000, "directions": 20}
+    latent_pde_1k_20_w = {"method": "pde", "latent_steps": 1000, "directions": 20, "shift_in_w_space": True}
+    latent_pde_1k_20 = {"method": "pde", "latent_steps": 1000, "directions": 20}
 
     runs = []
-    runs.append({"dataset": dataset_noise_s, "model": model_gan_200_20_ws, "latent_method": latent_warp_1k})
-    runs.append({"dataset": dataset_noise_s, "model": model_gan_200_20_ws, "latent_method": latent_linear_10k})
-    runs.append({"dataset": dataset_noise_s, "model": model_gan_200_20_ws, "latent_method": latent_pde_200_20})
+    runs.append({"dataset": dataset_noise_s_20, "model": model_gan_100_20_ws, "latent_method": None})
+    runs.append({"dataset": dataset_noise_m_20, "model": model_gan_100_20_ws, "latent_method": None})
+    runs.append({"dataset": dataset_noise_s_20, "model": model_gan_100_20_ws, "latent_method": latent_warp_100k_20})
+    runs.append({"dataset": dataset_noise_m_20, "model": model_gan_100_20_ws, "latent_method": latent_warp_100k_20})
+    runs.append({"dataset": dataset_noise_s_20, "model": model_gan_100_20_ws, "latent_method": latent_pde_20k_20})
+    runs.append({"dataset": dataset_noise_m_20, "model": model_gan_100_20_ws, "latent_method": latent_pde_20k_20})
+    runs.append({"dataset": dataset_noise_s_20, "model": model_gan_100_20_ws, "latent_method": latent_linear_50k})
+    runs.append({"dataset": dataset_noise_m_20, "model": model_gan_100_20_ws, "latent_method": latent_linear_50k})
+
+    runs.append({"dataset": dataset_noise_s_20, "model": model_gan_100_20, "latent_method": None})
+    runs.append({"dataset": dataset_noise_m_20, "model": model_gan_100_20, "latent_method": None})
+    runs.append({"dataset": dataset_noise_s_20, "model": model_gan_100_20, "latent_method": latent_warp_100k_20})
+    runs.append({"dataset": dataset_noise_m_20, "model": model_gan_100_20, "latent_method": latent_warp_100k_20})
+    runs.append({"dataset": dataset_noise_s_20, "model": model_gan_100_20, "latent_method": latent_pde_20k_20})
+    runs.append({"dataset": dataset_noise_m_20, "model": model_gan_100_20, "latent_method": latent_pde_20k_20})
+    runs.append({"dataset": dataset_noise_s_20, "model": model_gan_100_20, "latent_method": latent_linear_50k})
+    runs.append({"dataset": dataset_noise_m_20, "model": model_gan_100_20, "latent_method": latent_linear_50k})
+
+    runs.append(None)
+    runs.append({"dataset": dataset_noise_s_20, "model": model_stylegan2_2000, "latent_method": None})
+    runs.append({"dataset": dataset_noise_m_20, "model": model_stylegan2_2000, "latent_method": None})
+    runs.append({"dataset": dataset_noise_s_20, "model": model_stylegan2_2000, "latent_method": latent_warp_10k_w})
+    runs.append({"dataset": dataset_noise_m_20, "model": model_stylegan2_2000, "latent_method": latent_warp_10k_w})
+    runs.append({"dataset": dataset_noise_s_20, "model": model_stylegan2_2000, "latent_method": latent_pde_3k_20_w})
+    runs.append({"dataset": dataset_noise_m_20, "model": model_stylegan2_2000, "latent_method": latent_pde_3k_20_w})
+    runs.append({"dataset": dataset_noise_s_20, "model": model_stylegan2_2000, "latent_method": latent_linear_5k_w})
+    runs.append({"dataset": dataset_noise_m_20, "model": model_stylegan2_2000, "latent_method": latent_linear_5k_w})
+
+    runs.append({"dataset": dataset_noise_m, "model": model_stylegan2_20, "latent_method": None})
+    runs.append({"dataset": dataset_noise_s, "model": model_stylegan2, "latent_method": latent_warp_100_w})  # about 0.5s per step
+    runs.append({"dataset": dataset_noise_s, "model": model_stylegan2, "latent_method": latent_pde_50_20_w})  # about 1.7s per step
+    runs.append({"dataset": dataset_noise_s, "model": model_stylegan2, "latent_method": latent_linear_200_w})  # about 1.5s per step
+
+    runs.append({"dataset": dataset_noise_s, "model": model_stylegan2_2000, "latent_method": None})
+    runs.append({"dataset": dataset_noise_m, "model": model_stylegan2_2000, "latent_method": None})
+
+    runs.append({"dataset": dataset_noise_s, "model": model_stylegan2_2000, "latent_method": latent_warp_10k_w})
+    runs.append({"dataset": dataset_noise_s, "model": model_stylegan2_2000, "latent_method": latent_pde_3k_20_w})
+    runs.append({"dataset": dataset_noise_s, "model": model_stylegan2_2000, "latent_method": latent_linear_5k_w})
+    runs.append({"dataset": dataset_noise_m, "model": model_stylegan2_2000, "latent_method": latent_warp_10k_w})
+    runs.append({"dataset": dataset_noise_m, "model": model_stylegan2_2000, "latent_method": latent_linear_5k_w})
+    runs.append({"dataset": dataset_noise_m, "model": model_stylegan2_2000, "latent_method": latent_pde_3k_20_w})
+
+    runs.append({"dataset": dataset_noise_s, "model": model_stylegan2_2000, "latent_method": latent_warp_10k})
+    runs.append({"dataset": dataset_noise_s, "model": model_stylegan2_2000, "latent_method": latent_linear_5k})
+    runs.append({"dataset": dataset_noise_s, "model": model_stylegan2_2000, "latent_method": latent_pde_3k_20})
+    runs.append({"dataset": dataset_noise_m, "model": model_stylegan2_2000, "latent_method": latent_warp_10k})
+    runs.append({"dataset": dataset_noise_m, "model": model_stylegan2_2000, "latent_method": latent_linear_5k})
+    runs.append({"dataset": dataset_noise_m, "model": model_stylegan2_2000, "latent_method": latent_pde_3k_20})
     runs.append(None)  # Early stop
+    runs.append({"dataset": dataset_noise_s, "model": model_gan_200_20_ws, "latent_method": latent_warp_1k})
+    runs.append({"dataset": dataset_noise_s, "model": model_gan_200_20_ws, "latent_method": latent_linear_1k})
+    runs.append({"dataset": dataset_noise_s, "model": model_gan_200_20_ws, "latent_method": latent_pde_200_20})
     runs.append({"dataset": dataset_noise_s, "model": model_gan_200_20_ws, "latent_method": latent_warp_200k_20})
     runs.append({"dataset": dataset_noise_s, "model": model_gan_200_20_ws, "latent_method": latent_linear_100k})
     runs.append({"dataset": dataset_noise_s, "model": model_gan_200_20_ws, "latent_method": latent_pde_50k_20})
@@ -203,5 +291,5 @@ def main():
 
 if __name__ == '__main__':
     # Warped GAN Space seems to work here only on 1 device
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     main()

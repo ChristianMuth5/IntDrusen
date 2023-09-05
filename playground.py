@@ -141,7 +141,7 @@ def analyze_volume_classes(folder):
         transforms.Normalize(0.5, 0.5)
     ])
     droot = os.path.join("Data", "Bonn_128_5_rect_w10_s")
-    dataset = CustomDataset(droot, info, sorted(info.keys()), transformations, [2])
+    #dataset = CustomDataset(droot, info, sorted(info.keys()), transformations, [2])
 
     # Create the dataloader
 
@@ -149,31 +149,31 @@ def analyze_volume_classes(folder):
     class_counts = np.unique(vals, return_counts=True)[1]
     print("Original class counts")
     print(class_counts)
-    class_weights = 1 / class_counts
-    print(class_weights)
-    class_weights = class_weights * np.asarray([1, 4/6, 8/29, 16/111, 32/775])
-    class_weights = np.asarray([1 / 2 ** n for n in range(5, 0, -1)])
-    print(class_weights)
-    sample_weights = torch.tensor([class_weights[x[1]] for x in dataset])
-    sampler = WeightedRandomSampler(weights=sample_weights, num_samples=len(dataset), replacement=True)
+    #class_weights = 1 / class_counts
+    #print(class_weights)
+    #class_weights = class_weights * np.asarray([1, 4/6, 8/29, 16/111, 32/775])
+    #class_weights = np.asarray([1 / 2 ** n for n in range(5, 0, -1)])
+    #print(class_weights)
+    #sample_weights = torch.tensor([class_weights[x[1]] for x in dataset])
+    #sampler = WeightedRandomSampler(weights=sample_weights, num_samples=len(dataset), replacement=True)
 
-    dataloader = DataLoader(dataset, batch_size=128, num_workers=16, sampler=sampler)
+    #dataloader = DataLoader(dataset, batch_size=128, num_workers=16, sampler=sampler)
 
-    class_counter = np.asarray([0, 0, 0, 0, 0])
-    indices = np.zeros(len(dataset))
-    for i, data in enumerate(dataloader, 0):
-        classes = data[1]
-        index = data[2]
-        a, b = np.unique(classes.numpy(), return_counts=True)
-        for i in range(len(a)):
-            class_counter[a[i]] = class_counter[a[i]] + b[i]
-        for i in index:
-            indices[i] = indices[i] + 1
-    print("Moditied sampling class counts")
-    print(class_counter)  # [14827 14936 14927 14606 14847]
-    print(np.sum(class_counter))  # 74143
-    print(np.sum(indices))
-    print(np.unique(indices, return_counts=True))
+    #class_counter = np.asarray([0, 0, 0, 0, 0])
+    #indices = np.zeros(len(dataset))
+    #for i, data in enumerate(dataloader, 0):
+    #    classes = data[1]
+    #    index = data[2]
+    #    a, b = np.unique(classes.numpy(), return_counts=True)
+    #    for i in range(len(a)):
+    #        class_counter[a[i]] = class_counter[a[i]] + b[i]
+    #    for i in index:
+    #        indices[i] = indices[i] + 1
+    #print("Moditied sampling class counts")
+    #print(class_counter)  # [14827 14936 14927 14606 14847]
+    #print(np.sum(class_counter))  # 74143
+    #print(np.sum(indices))
+    #print(np.unique(indices, return_counts=True))
 
 """
 (array([0.00000, 1.00000, 2.00000, 3.00000, 4.00000, 5.00000, 6.00000,
@@ -201,22 +201,19 @@ def create_volume_overview(folder):
     pool.close()
     pool.join()
 
-def main():
-    np.set_printoptions(formatter={'float_kind': "{:.5f}".format})
-    #check_folder_equals()
-    #generate_overview(os.path.join("Data", "Bonn_128_5_RBL", "1_ov"))
 
-    folder = os.path.join("Data", "Bonn_128_5_rect_w10_s")
-    #analyze_hists(folder)
-    #analyze_volume_classes(folder)
+def check_if_latent_codes_fit():
     path = os.path.join("Data", "Bonn_128_5_rect_w10_s_aug_bce_ws_results_GAN_200epochs_20nz_warp1000_20",
                         "experiments", "complete", "GAN128-LeNet-K20-D5-LearnGammas-eps0.15_0.25", "results",
                         "GAN128_20", "32_0.2_6.4")
     drusen_folder = sorted(glob.glob(os.path.join(path, "4d12ee4688793d6d12e4d8b9a318943685f77af6")))
-    #path = os.path.join("Data", "Bonn_128_5_rect_w10_s_aug_bce_ws_results_GAN_200epochs_20nz_pde200_20",
+    # path = os.path.join("Data", "Bonn_128_5_rect_w10_s_aug_bce_ws_results_GAN_200epochs_20nz_pde200_20",
     #                    "experiments", "complete", "GAN128-LeNet-K20-D10", "results",
     #                    "GAN128_20", "64_0.2_12.8")
-    #drusen_folder = sorted(glob.glob(os.path.join(path, "4a12aeae2d0678fd35dbcafea14c8bd2e4791c96")))
+    # drusen_folder = sorted(glob.glob(os.path.join(path, "4a12aeae2d0678fd35dbcafea14c8bd2e4791c96")))
+    path = os.path.join("Data", "Bonn_128_5_rect_w10_s_aug_bce_ws_results_GAN_200epochs_20nz_linear1000_ortho",
+                        "paths")
+    drusen_folder = sorted(glob.glob(os.path.join(path, "Druse_011")))
     G = get_generator(1, 20)
     g_path = os.path.join("Data", "Bonn_128_5_rect_w10_s_aug_bce_ws_results_GAN_200epochs_20nz", "generator.pt")
     G.load_state_dict(torch.load(g_path))
@@ -224,7 +221,7 @@ def main():
     for df in drusen_folder:
         latent_codes = torch.load(os.path.join(df, "paths_latent_codes.pt"), map_location=lambda storage, loc: storage)
         path_folder = os.path.join(df, "paths_images", "path_000")
-        #path_folder = os.path.join(df, "paths_images", "path_001")
+        # path_folder = os.path.join(df, "paths_images", "path_001")
         path_images = sorted(glob.glob(os.path.join(path_folder, "*.jpg")))
         print(df)
         fig, axes = plt.subplots(2, 10, figsize=(20, 10))
@@ -244,8 +241,26 @@ def main():
         plt.close()
         return
 
-    #middle_drusen_code = latent_codes[0][latent_codes.shape[1]//2]
+    # middle_drusen_code = latent_codes[0][latent_codes.shape[1]//2]
     # Format: path_i, image_in_path_i, vector
+
+
+def main():
+    np.set_printoptions(formatter={'float_kind': "{:.5f}".format})
+    #check_folder_equals()
+    #generate_overview(os.path.join("Data", "Bonn_128_5_RBL", "1_ov"))
+
+    #analyze_hists(folder)
+    folder = os.path.join("Data", "Bonn_128_5_rect_w10_s")
+    analyze_volume_classes(folder)
+    folder = os.path.join("Data", "Bonn_128_5_rect_w20_s")
+    analyze_volume_classes(folder)
+    folder = os.path.join("Data", "Bonn_128_5_rect_w10_m")
+    analyze_volume_classes(folder)
+    folder = os.path.join("Data", "Bonn_128_5_rect_w20_m")
+    analyze_volume_classes(folder)
+    #print(np.linalg.inv(np.asarray([[1,0,0],[0,1,0],[0,0,1]])))
+
 
 
 if __name__ == "__main__":

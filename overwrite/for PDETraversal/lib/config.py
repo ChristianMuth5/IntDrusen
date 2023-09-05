@@ -58,6 +58,7 @@ GAN_WEIGHTS = {
         'url': 'https://www.dropbox.com/s/rwhul1kjg2r2m88/pretrained_stylegan2_generators.tar?dl=1',
         'sha256sum': '99f345cc67d88cc5292fed0f8b458192d57eccb0ec291145b5123de5015d0608',
         'weights': {
+            128: 'PDETraversal/models/pretrained/generators/StyleGAN2.pkl',
             256: 'models/pretrained/generators/StyleGAN2/stylegan2-ffhq-256-550000.pt',
             1024: 'models/pretrained/generators/StyleGAN2/stylegan2-ffhq-config-f.pt'
         }
@@ -66,7 +67,7 @@ GAN_WEIGHTS = {
         'url': '',
         'sha256sum': '',
         'weights': {
-            GAN_RESOLUTIONS['GAN128']: 'WarpedGANSpace/models/pretrained/generators/generator.pt'
+            GAN_RESOLUTIONS['GAN128']: 'PDETraversal/models/pretrained/generators/generator.pt'
         }
     }
 }

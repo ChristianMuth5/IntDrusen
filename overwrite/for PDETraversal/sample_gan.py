@@ -7,7 +7,7 @@ from torch import nn
 from hashlib import sha1
 from torchvision.transforms import ToPILImage
 from lib import *
-from models.gan_load import build_biggan, build_proggan, build_stylegan2, build_sngan, build_gan128
+from models.gan_load import build_biggan, build_proggan, build_stylegan2, build_sngan, build_gan128, build_stylegan3
 from models.vae import VAE, ConvVAE
 import numpy as np
 
@@ -57,7 +57,7 @@ def main():
     parser.add_argument('--shift-in-w-space', action='store_true', help="search latent paths in StyleGAN2's W-space")
     parser.add_argument('--z-truncation', type=float, help="set latent code sampling truncation parameter")
     parser.add_argument('--biggan-target-classes', nargs='+', type=int, help="list of classes for conditional BigGAN")
-    parser.add_argument('--stylegan2-resolution', type=int, default=1024, choices=(256, 1024),
+    parser.add_argument('--stylegan2-resolution', type=int, default=1024, choices=(128, 256, 1024),
                         help="StyleGAN2 image resolution")
     parser.add_argument('--num-samples', type=int, default=4, help="number of latent codes to sample")
     parser.add_argument('--pool', type=str, help="name of latent codes/images pool")
@@ -110,11 +110,15 @@ def main():
         if args.gan_type == 'BigGAN':
             print("      \\__Target classes: {}".format(args.biggan_target_classes))
         print("  \\__Pre-trained weights: {}".format(
-            GAN_WEIGHTS[args.gan_type]['weights'][args.stylegan2_resolution] if args.gan_type == 'StyleGAN2' else
+            GAN_WEIGHTS[args.gan_type]['weights'][args.stylegan2_resolution] if args.gan_type in ['StyleGAN2', 'StyleGAN3'] else
             GAN_WEIGHTS[args.gan_type]['weights'][GAN_RESOLUTIONS[args.gan_type]]))
     # === GAN128 ===
     if args.gan_type == 'GAN128':
         G = build_gan128(pretrained_gan_weights=GAN_WEIGHTS[args.gan_type]['weights'][GAN_RESOLUTIONS[args.gan_type]], nz=20)
+    # === StyleGAN3 ===
+    elif args.gan_type == 'StyleGAN3':
+        G = build_stylegan3(pretrained_gan_weights=GAN_WEIGHTS[args.gan_type]['weights'][GAN_RESOLUTIONS[args.gan_type]],
+                            shift_in_w_space=args.shift_in_w_space)
     # -- BigGAN
     elif args.gan_type == 'BigGAN':
         G = build_biggan(pretrained_gan_weights=GAN_WEIGHTS[args.gan_type]['weights'][GAN_RESOLUTIONS[args.gan_type]],

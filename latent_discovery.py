@@ -32,12 +32,77 @@ import subprocess
 from visualization import generate_gifs_warp, generate_gifs_linear
 
 
+def map_for_stylegan(input):
+    out = torch.index_select(input, 1, torch.tensor([0]).cuda())
+    return out.squeeze(dim=1)
+
+# Taken and adapted from WarpedGANSpace
+class StyleGAN2Wrapper(nn.Module):
+    def __init__(self, G, shift_in_w_space):
+        super(StyleGAN2Wrapper, self).__init__()
+        self.G = G
+        self.shift_in_w_space = shift_in_w_space
+        self.dim_z = G.z_dim
+        self.dim_w = G.w_dim if self.shift_in_w_space else self.dim_z
+
+    def get_w(self, z):
+        """Return batch of w latent codes given a batch of z latent codes.
+
+        Args:
+            z (torch.Tensor) : Z-space latent code of size [batch_size, 512]
+
+        Returns:
+            w (torch.Tensor) : W-space latent code of size [batch_size, 512]
+
+        """
+        return map_for_stylegan(self.G.mapping(z, None, truncation_psi=0.5, truncation_cutoff=8))
+
+    def forward(self, z, shift=None):
+        """StyleGAN2 generator forward function.
+
+        Args:
+            z (torch.Tensor)     : Batch of latent codes in Z-space
+            shift (torch.Tensor) : Batch of shift vectors in Z- or W-space (based on self.shift_in_w_space)
+            latent_is_w (bool)   : Input latent code (denoted by z here) is in W-space
+
+        Returns:
+            I (torch.Tensor)     : Output images of size [batch_size, 3, resolution, resolution]
+        """
+        # The given latent codes lie on Z- or W-space, while the given shifts lie on the W-space
+        if self.shift_in_w_space:
+            #if latent_is_w:
+                # Input latent code is in W-space
+            # Input latent code is in Z-space -- get w code first
+            w = map_for_stylegan(self.G.mapping(z, None, truncation_psi=0.5, truncation_cutoff=8))
+            w = w if shift is None else w + shift
+            # print(w.shape)
+            w = w.unsqueeze(dim=1).repeat(1, self.G.num_ws, 1)
+            # print(w.shape)
+            out = self.G.synthesis(w, noise_mode='const', force_fp32=True)
+            out = torch.index_select(out, 1, torch.tensor([0]).cuda())
+            #else:
+                # Input latent code is in Z-space -- get w code first
+                #w = self.G.get_latent(z)
+                #return self.G([w if shift is None else w + shift], input_is_latent=True)[0]
+        # The given latent codes and shift vectors lie on the Z-space
+        else:
+            out = self.G(z if shift is None else z + shift, None)
+        return out
+
+
 # Big chunks of this code are taken from GANLatentDiscovery
 def find_latent_linear(run, G, out_dir, logger: logging.Logger):
     latent_method = run["latent_method"]
     steps = latent_method["latent_steps"]
     deformator_type = latent_method["deformator_type"]
-    is_style_gan = run["model"]["train_method"] == "StyleGAN"
+    model = run["model"]["train_method"]
+    is_style_gan = model in ["StyleGAN2", "StyleGAN3"]
+    directions = latent_method["directions"]
+    shift_in_w_space = latent_method["shift_in_w_space"] if "shift_in_w_space" in latent_method else False
+
+    if is_style_gan:
+        G = StyleGAN2Wrapper(G,shift_in_w_space=shift_in_w_space)
+
     # Number of channels in the training images. For color images this is 3
     nc = 1
     # Size of z latent vector (i.e. size of generator input)
@@ -51,7 +116,7 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
     G.eval()
 
     def feed_G(G, input):
-        return G(torch.squeeze(input, (2, 3)), None) if is_style_gan else G(input)
+        return G(torch.squeeze(input, (2, 3))) if is_style_gan else G(input)
 
     # custom weights initialization called on netG and netD
     def weights_init(m):
@@ -311,19 +376,19 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
 
             return out
 
-    def get_deformator(deformator_type, shift_dim):
+    def get_deformator(deformator_type, shift_dim, input_dim):
         if deformator_type == 'FC':
-            return LatentDeformatorFC(shift_dim=shift_dim).cuda()
+            return LatentDeformatorFC(shift_dim=shift_dim, input_dim=input_dim).cuda()
         if deformator_type == 'LINEAR':
-            return LatentDeformatorLinear(shift_dim=shift_dim).cuda()
+            return LatentDeformatorLinear(shift_dim=shift_dim, input_dim=input_dim).cuda()
         if deformator_type == 'ID':
-            return LatentDeformatorID(shift_dim=shift_dim).cuda()
+            return LatentDeformatorID(shift_dim=shift_dim, input_dim=input_dim).cuda()
         if deformator_type == 'ORTHO':
-            return LatentDeformatorOrtho(shift_dim=shift_dim).cuda()
+            return LatentDeformatorOrtho(shift_dim=shift_dim, input_dim=input_dim).cuda()
         if deformator_type == 'PROJECTIVE':
-            return LatentDeformatorProjective(shift_dim=shift_dim).cuda()
+            return LatentDeformatorProjective(shift_dim=shift_dim, input_dim=input_dim).cuda()
         if deformator_type == 'RANDOM':
-            return LatentDeformatorRandom(shift_dim=shift_dim).cuda()
+            return LatentDeformatorRandom(shift_dim=shift_dim, input_dim=input_dim).cuda()
         return False
 
     # From latent_shift_predictor.py from GANLatentDiscovery
@@ -469,7 +534,7 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
             if deformator is not None:
                 latent_shift = deformator(one_hot(deformator.input_dim, shift, dim).cuda())
             else:
-                latent_shift = one_hot(G.dim_z, shift, dim).cuda()
+                latent_shift = one_hot(nz, shift, dim).cuda()
             latent_shift = latent_shift.unsqueeze(2).unsqueeze(3)
             shifted_image = feed_G(G, z + latent_shift).cpu()[0]
 
@@ -499,7 +564,7 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
         if with_deformation:
             deformator_is_training = deformator.training
             deformator.eval()
-        z = z if z is not None else make_noise(1, G.dim_z)
+        z = z if z is not None else make_noise(1, nz)
 
         if with_deformation:
             original_img = feed_G(G, z).cpu()
@@ -535,8 +600,8 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
         os.makedirs(out_dir, exist_ok=True)
 
         step = 20
-        max_dim = G.dim_z
-        zs = zs if zs is not None else make_noise(num_z, G.dim_z)
+        max_dim = nz
+        zs = zs if zs is not None else make_noise(num_z, nz)
         shifts_count = zs.shape[0]
 
         for start in range(0, max_dim - 1, step):
@@ -707,7 +772,7 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
                 json.dump(stat_dict, out)
 
         def log_interpolation(self, G, deformator, step):
-            noise = make_noise(1, G.dim_z, self.p.truncation)
+            noise = make_noise(1, nz, self.p.truncation)
             if self.fixed_test_noise is None:
                 self.fixed_test_noise = noise.clone()
             for z, prefix in zip([noise, self.fixed_test_noise], ['rand', 'fixed']):
@@ -793,7 +858,7 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
                 deformator.zero_grad()
                 shift_predictor.zero_grad()
 
-                z = make_noise(self.p.batch_size, G.dim_z, self.p.truncation)
+                z = make_noise(self.p.batch_size, nz, self.p.truncation)
                 target_indices, shifts, basis_shift = self.make_shifts(deformator.input_dim)
 
                 # if should_gen_classes:
@@ -847,7 +912,7 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
 
         percents = torch.empty([n_steps])
         for step in range(n_steps):
-            z = make_noise(trainer.p.batch_size, G.dim_z, trainer.p.truncation)
+            z = make_noise(trainer.p.batch_size, nz, trainer.p.truncation)
             target_indices, shifts, basis_shift = trainer.make_shifts(deformator.input_dim)
 
             imgs = feed_G(G, z)
@@ -865,7 +930,7 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
     def save_results_charts(G, deformator, params, out_dir):
         deformator.eval()
         G.eval()
-        z = make_noise(3, G.dim_z, params.truncation)
+        z = make_noise(3, nz, params.truncation)
         inspect_all_directions(G, deformator, os.path.join(out_dir, 'charts_s{}'.format(int(params.shift_scale))), zs=z,
                                shifts_r=params.shift_scale)
         inspect_all_directions(G, deformator, os.path.join(out_dir, 'charts_s{}'.format(int(3 * params.shift_scale))),
@@ -874,7 +939,7 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
 
     def train_gan_latent_space(G, deformator_type, out_dir, n_steps):
         # Choose which Latent Deformator to use:
-        deformator = get_deformator(deformator_type=deformator_type, shift_dim=G.dim_z)
+        deformator = get_deformator(deformator_type=deformator_type, shift_dim=nz, input_dim=directions)
         if not deformator:
             logger.error('Deformator type does not exist')
             return
@@ -886,7 +951,7 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
         trainer = Trainer(params, out_dir=out_dir)
         trainer.train(G, deformator, shift_predictor, multi_gpu=False)
 
-        save_results_charts(G, deformator, params, trainer.log_dir)
+        #save_results_charts(G, deformator, params, trainer.log_dir)
         return
 
     def save_drusen_image(t, i, path_dir, path_i, step_i):
@@ -906,7 +971,7 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
 
         # Sample G for drusen and generate all relevant paths and save the drusen
         num_drusen = 20
-        num_paths = G.dim_z
+        num_paths = directions
         drusen_folders = [os.path.join(path_dir, f"Druse_{i:03d}") for i in range(num_drusen)]
         for df in drusen_folders:
             os.makedirs(df)
@@ -915,14 +980,14 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
             for i in range(num_paths):
                 os.makedirs(os.path.join(paths_dir, f"path_{i:03d}"))
 
-        z = make_noise(num_drusen, G.dim_z)
+        z = make_noise(num_drusen, nz)
         drusen = feed_G(G, z)
         for i in range(num_drusen):
             save_drusen_image(drusen, i, path_dir, -1, -1)
             torch.save(z[i].cpu(), os.path.join(path_dir, f"Druse_{i:03d}", 'latent_code_image.pt'))
 
         # Load deformator
-        deformator = get_deformator(deformator_type=deformator_type, shift_dim=G.dim_z)
+        deformator = get_deformator(deformator_type=deformator_type, shift_dim=nz, input_dim=directions)
         deformator.cuda()
         deformator_paths = glob.glob(os.path.join(folder, "models", "deformator_*.pt"))
         nums = np.asarray([int(os.path.split(x)[-1].split("_")[1].split(".")[0]) for x in deformator_paths], dtype=int)
@@ -933,7 +998,9 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
         # Setup params, n_steps does not matter here
         params = setup_params(deformator, 100000)
         shifts_r = 2 * params.shift_scale
-        shifts_count = 33/2
+        shifts_count = 16
+
+        latent_codes = torch.zeros((num_drusen, num_paths, 33, nz))
 
         # Create images:
         for dim in range(num_paths):
@@ -941,10 +1008,15 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
             for shift in np.arange(-shifts_r, shifts_r + 1e-9, shifts_r / shifts_count):
                 latent_shift = deformator(one_hot(deformator.input_dim, shift, dim).cuda())
                 latent_shift = latent_shift.unsqueeze(2).unsqueeze(3)
-                result = feed_G(G, z + latent_shift).cpu()
+                z_shifted = z + latent_shift
+                result = feed_G(G, z_shifted).cpu()
                 for j in range(num_drusen):
+                    latent_codes[j, dim, i] = z_shifted[j].squeeze()
                     save_drusen_image(result, j, path_dir, dim, i)
                 i += 1
+        for i in range(num_drusen):
+            torch.save(latent_codes[i], os.path.join(path_dir, f"Druse_{i:03d}", 'paths_latent_codes.pt'))
+
         return
 
     train_gan_latent_space(G, deformator_type, out_dir=out_dir, n_steps=steps)
@@ -961,8 +1033,10 @@ def find_latent_warp(run, out_dir, model_folder, logger: logging.Logger):
     warp_folder = "WarpedGANSpace"
     latent_method = run["latent_method"]
     latent_steps = latent_method["latent_steps"]
-    is_stylegan = run["model"]["train_method"] == "StyleGAN"
+    model = run["model"]["train_method"]
+    is_stylegan = model in ["StyleGAN2", "StyleGAN3"]
     directions = latent_method["directions"]
+    shift_in_w_space = latent_method["shift_in_w_space"] if "shift_in_w_space" in latent_method else False
 
     # Delete old data
     shutil.rmtree("experiments", ignore_errors=True)
@@ -970,7 +1044,7 @@ def find_latent_warp(run, out_dir, model_folder, logger: logging.Logger):
     # Copy model code and generator
     warp_model_folder = os.path.join(warp_folder, "models", "pretrained", "generators")
     if is_stylegan:
-        shutil.copy(run["model"]["path_to_g"], os.path.join(warp_model_folder, "StyleGAN3.pkl"))
+        shutil.copy(run["model"]["path_to_g"], os.path.join(warp_model_folder, f"{model}.pkl"))
     else:
         shutil.copy(os.path.join(model_folder, "generator.pt"), os.path.join(warp_model_folder, "generator.pt"))
         shutil.copy(os.path.join(model_folder, "model.py"), os.path.join(warp_model_folder, "model.py"))
@@ -982,8 +1056,7 @@ def find_latent_warp(run, out_dir, model_folder, logger: logging.Logger):
     eps_max = 0.25
     gan_type = "GAN128"
     if is_stylegan:
-        gan_type = "StyleGAN3"
-    shift_in_w_space = False
+        gan_type = model
     cmd = ["python",
            os.path.join(warp_folder, "train.py"),
            f"--gan-type={gan_type}",
@@ -1003,11 +1076,15 @@ def find_latent_warp(run, out_dir, model_folder, logger: logging.Logger):
     logger.info("Finished discovering directions")
 
     # Create sample images
-    num_samples = 20
+    num_samples = 100
     cmd = ["python",
            os.path.join(warp_folder, "sample_gan.py"),
            f"--gan-type={gan_type}",
            f"--num-samples={num_samples}"]
+    if is_stylegan:
+        if shift_in_w_space:
+            cmd += ["--shift-in-w-space"]
+        cmd += ["--stylegan2-resolution=128"]
     subprocess.run(cmd)
     logger.info("Finished creating samples")
 
@@ -1041,8 +1118,10 @@ def find_latent_pde(run, out_dir, model_folder, logger: logging.Logger):
     pde_folder = "PDETraversal"
     latent_method = run["latent_method"]
     latent_steps = latent_method["latent_steps"]
-    is_stylegan = run["model"]["train_method"] == "StyleGAN"
+    model = run["model"]["train_method"]
+    is_stylegan = model in ["StyleGAN2", "StyleGAN3"]
     directions = latent_method["directions"]
+    shift_in_w_space = latent_method["shift_in_w_space"] if "shift_in_w_space" in latent_method else False
 
     # Delete old data
     shutil.rmtree("experiments", ignore_errors=True)
@@ -1050,7 +1129,7 @@ def find_latent_pde(run, out_dir, model_folder, logger: logging.Logger):
     # Copy model code and generator
     pde_model_folder = os.path.join(pde_folder, "models", "pretrained", "generators")
     if is_stylegan:
-        shutil.copy(run["model"]["path_to_g"], os.path.join(pde_model_folder, "StyleGAN3.pkl"))
+        shutil.copy(run["model"]["path_to_g"], os.path.join(pde_model_folder, f"{model}.pkl"))
     else:
         shutil.copy(os.path.join(model_folder, "generator.pt"), os.path.join(pde_model_folder, "generator.pt"))
         shutil.copy(os.path.join(model_folder, "model.py"), os.path.join(pde_model_folder, "model.py"))
@@ -1058,18 +1137,16 @@ def find_latent_pde(run, out_dir, model_folder, logger: logging.Logger):
     # Execute discovery of directions
     num_support_sets = directions
     num_support_timesteps = 10
-    eps_min = 0.15
-    eps_max = 0.25
     gan_type = "GAN128"
     if is_stylegan:
-        gan_type = "StyleGAN3"
-    shift_in_w_space = False
+        gan_type = model
     cmd = ["python",
            os.path.join(pde_folder, "train.py"),
            f"--gan-type={gan_type}",
            "--reconstructor-type=LeNet",
            f"--num-support-sets={num_support_sets}",
            f"--num-support-timesteps={num_support_timesteps}",
+           "--batch-size=8",
            f"--max-iter={latent_steps}",
            f"--ckp-freq={latent_steps//10}"]
     if is_stylegan:
@@ -1080,11 +1157,15 @@ def find_latent_pde(run, out_dir, model_folder, logger: logging.Logger):
     logger.info("Finished discovering directions")
 
     # Create sample images
-    num_samples = 20
+    num_samples = 100
     cmd = ["python",
            os.path.join(pde_folder, "sample_gan.py"),
            f"--gan-type={gan_type}",
            f"--num-samples={num_samples}"]
+    if is_stylegan:
+        if shift_in_w_space:
+            cmd += ["--shift-in-w-space"]
+        cmd += ["--stylegan2-resolution=128"]
     subprocess.run(cmd)
     logger.info("Finished creating samples")
 
@@ -1117,15 +1198,18 @@ def find_latent_pde(run, out_dir, model_folder, logger: logging.Logger):
 # G the Generator, already loaded
 # out_dir the path where to save everything to
 def find_latent(run, G, out_dir, logger: logging.Logger):
-    if "latent_method" not in run:  # don't search for directions
+    if "latent_method" not in run or run["latent_method"] is None:  # don't search for directions
         return
     latent_method = run["latent_method"]
     method = latent_method["method"]
     steps = latent_method["latent_steps"]
     deformator_type = latent_method["deformator_type"] if method == "linear" else None
+    shift_in_w_space = latent_method["shift_in_w_space"] if "shift_in_w_space" in latent_method else False
 
     model_folder = out_dir
     out_dir = f"{out_dir}_{method}{steps}"
+    if shift_in_w_space:
+        out_dir += "_w"
     if method == "linear":
         out_dir += f"_{deformator_type.lower()}"
     elif method == "warp" or method == "pde":

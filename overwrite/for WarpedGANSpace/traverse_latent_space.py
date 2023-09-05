@@ -259,7 +259,7 @@ def main():
         print("  \\__GAN type: {}".format(gan_type))
         print("  \\__Pre-trained weights: {}".format(
             GAN_WEIGHTS[gan_type]['weights'][args_json.__dict__["stylegan2_resolution"]]
-            if gan_type == 'StyleGAN2' else GAN_WEIGHTS[gan_type]['weights'][GAN_RESOLUTIONS[gan_type]]))
+            if gan_type in ['StyleGAN2', 'StyleGAN3'] else GAN_WEIGHTS[gan_type]['weights'][GAN_RESOLUTIONS[gan_type]]))
 
     G = build_gan(gan_type=gan_type,
                   target_classes=args_json.__dict__["biggan_target_classes"],

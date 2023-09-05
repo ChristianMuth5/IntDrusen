@@ -2,6 +2,7 @@
 
 2) Clone stylegan3 from https://github.com/NVlabs/stylegan3/tree/main into the folder "stylegan3".
 2) a) Copy folders "dnnlib" and "torch_utils" from "stylegan3" to main folder as they are required to run commands from python files in the main folder.
+2) b) Set in trainer.py the os.environ["CUDA_HOME"] to your CUDA_HOME environment variable
 
 3) Clone WarpedGANSpace from https://github.com/chi0tzp/WarpedGANSpace into the folder "WarpedGANSpace".
 3) a) Overwrite files in "WarpedGANSpace" with those in the folder "overwrite".

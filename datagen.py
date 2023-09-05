@@ -247,16 +247,17 @@ def segment_drusen(watershed, scan, minimum_drusen_height, erosion_kernel_width)
         # rpe_line[np.sum(scan, axis=0) == 0] = 0
         scan = scan.astype(int)
         rpe_line = np.sum(scan, axis=0)
-        peaks, _ = find_peaks(rpe_line, distance=watershed, height=minimum_drusen_height - 2)
+        peaks, _ = find_peaks(rpe_line, distance=watershed, height=minimum_drusen_height-2)
         if len(peaks) <= 1:  # no drusen or only one
             return scan
 
         seps = []
         p = peaks[0]
-        for peak_i in range(1, len(peaks)):
-            n = peaks[peak_i]
+        for n_i in range(1, len(peaks)):
+            n = peaks[n_i]
             min_i = p + np.argmin(rpe_line[p:n])
-            if rpe_line[min_i] > 0:
+            min_val = rpe_line[min_i]
+            if min_val > 0 and min_val+8 < rpe_line[p] and min_val+8 < rpe_line[n]:
                 seps.append(min_i)
             p = n
         for sep in seps:
@@ -366,6 +367,9 @@ def process_scan(data, i, erosion_kernel_width, min_pixels_threshold, target_ima
         w = np.sum(scan_temp, axis=1)
         w = int(np.median(w[w > 0]))
         v = int(np.sum(scan_temp))
+        if v > 7500:  # those drusen are not good looking, this is only about 15 images
+            continue
+        v_val = v
         if v < 100:
             v = 0
         elif v < 300:
@@ -377,10 +381,7 @@ def process_scan(data, i, erosion_kernel_width, min_pixels_threshold, target_ima
         else:
             v = 4
 
-        if v == 4020:
-            np.save(os.path.join("Data", "interesting_arr.npy"), scan_temp)
-
-        fname = f"{target_filename}_scan{i:02d}_drusen{j:02d}.png"
+        fname = f"{target_filename}_scan{i:02d}_drusen{j:02d}_{v_val}.png"
         filepath = os.path.join(target_dir, fname)
 
         # Move the drusen to the center or skip if it would create a straight like border region
@@ -583,6 +584,13 @@ def generate_drusen(run, method):
     normalize_info(os.path.join(target_dir, os.pardir), scale)
 
 
+def pad_image(path_to_img, save_to):
+    im = cv2.imread(path_to_img, cv2.IMREAD_GRAYSCALE)
+    im2 = np.pad(im, ((32, 32), (0, 0)))
+    fname = os.path.join(save_to, os.path.split(path_to_img)[1])
+    cv2.imwrite(fname, im2)
+
+
 # generates the data
 def gen_data(run, logger: logging.Logger):
     dataset = run["dataset"]
@@ -594,7 +602,7 @@ def gen_data(run, logger: logging.Logger):
     rectify = dataset["rectify"]
     watershed = dataset["watershed"]
 
-    is_for_stylegan = run["model"]["train_method"] == "StyleGAN"
+    is_for_stylegan = run["model"]["train_method"] in ["StyleGAN2", "StyleGAN3"]
 
     gauss_sigma = 2
     method = 0  # none
@@ -657,11 +665,23 @@ def gen_data(run, logger: logging.Logger):
         if os.path.exists(target_zip):
             logger.info("Data is already converted to StyleGAN")
             return
+        # Images need to be padded to 128x128
+        src_dir_squared = src_dir + "_squared"
+        if not os.path.exists(src_dir_squared):
+            os.makedirs(src_dir_squared)
+            os.makedirs(os.path.join(src_dir_squared, "1"))
+            files = glob.glob(os.path.join(src_dir, "1", "*"))
+            pool = mp.Pool(mp.cpu_count())
+            partial_process_item = partial(pad_image, save_to=os.path.join(src_dir_squared, "1"))
+            pool.map(partial_process_item, files)
+
+            pool.close()
+            pool.join()
         filename = os.path.join("stylegan3", "dataset_tool.py")
         cmd = ["python", filename,
-               "--source=" + src_dir,
+               "--source=" + src_dir_squared,
                "--dest=" + target_zip]
-        logger.info(f"Converting dataset to StyleGAN with command{cmd}")
+        logger.info(f"Converting dataset to StyleGAN compatible dataset with command {cmd}")
         subprocess.run(cmd)
         logger.info("Finished converting")
     return
