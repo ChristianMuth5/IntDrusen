@@ -251,15 +251,14 @@ def main():
     #generate_overview(os.path.join("Data", "Bonn_128_5_RBL", "1_ov"))
 
     #analyze_hists(folder)
-    folder = os.path.join("Data", "Bonn_128_5_rect_w10_s")
-    analyze_volume_classes(folder)
-    folder = os.path.join("Data", "Bonn_128_5_rect_w20_s")
-    analyze_volume_classes(folder)
-    folder = os.path.join("Data", "Bonn_128_5_rect_w10_m")
-    analyze_volume_classes(folder)
-    folder = os.path.join("Data", "Bonn_128_5_rect_w20_m")
-    analyze_volume_classes(folder)
-    #print(np.linalg.inv(np.asarray([[1,0,0],[0,1,0],[0,0,1]])))
+    #folder = os.path.join("Data", "Bonn_128_5_rect_w10_s")
+    #analyze_volume_classes(folder)
+    #folder = os.path.join("Data", "Bonn_128_5_rect_w20_s")
+    #analyze_volume_classes(folder)
+    #folder = os.path.join("Data", "Bonn_128_5_rect_w10_m")
+    #analyze_volume_classes(folder)
+    #folder = os.path.join("Data", "Bonn_128_5_rect_w20_m")
+    #analyze_volume_classes(folder)
 
 
 

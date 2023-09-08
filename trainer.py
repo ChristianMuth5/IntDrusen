@@ -544,7 +544,6 @@ def train_stylegan(run, folder_out, logger: logging.Logger):
         sys.path.append(tu_path)
     if dnnlib_path not in sys.path:
         sys.path.append(dnnlib_path)
-    os.environ["CUDA_HOME"] = "/home/christian/cuda"
 
     dataroot = run["dataroot"]
     model_param = run["model"]
@@ -643,9 +642,26 @@ def train(run, logger: logging.Logger):
     if train_method == "GAN" or train_method == "ComplexGAN":
         G, folder_out = train_own_model(run, folder_out, logger)
         close_logger()
-        return G, folder_out
 
-    if is_stylegan:
+    elif is_stylegan:
         G, folder_out = train_stylegan(run, folder_out, logger)
         close_logger()
-        return G, folder_out
+    else:
+        G, folder_out = None, None
+
+    # drusen dir will not exists for newly trained models, thus preventing this code from running when no human has yet
+    # looked at possibly interesting drusen created by this model
+    drusen_dir = os.path.join(folder_out, "drusen")
+    if "drusen" in run and os.path.exists(drusen_dir):
+        drusen = run["drusen"]
+        int_drusen_dir = os.path.join(folder_out, "interesting_drusen")
+        shutil.rmtree(int_drusen_dir)
+        os.makedirs(int_drusen_dir)
+        for i, name in [(0, "Reticular Pseudo Drusen"), (1, "Drusenoid PED"), (2, "Small hard Drusen"), (3, "Large soft Drusen"), (4, "Other")]:
+            sub_dir = os.path.join(int_drusen_dir, name)
+            os.makedirs(sub_dir)
+            for drusen_i in drusen[i]:
+                shutil.copy(os.path.join(drusen_dir, f"image_{drusen_i}.jpg"), sub_dir)
+                shutil.copy(os.path.join(drusen_dir, f"latent_code_{drusen_i}.pt"), sub_dir)
+
+    return G, folder_out

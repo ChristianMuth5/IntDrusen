@@ -584,11 +584,10 @@ def generate_drusen(run, method):
     normalize_info(os.path.join(target_dir, os.pardir), scale)
 
 
-def pad_image(path_to_img, save_to):
-    im = cv2.imread(path_to_img, cv2.IMREAD_GRAYSCALE)
+def pad_image(data):
+    im = cv2.imread(data[0], cv2.IMREAD_GRAYSCALE)
     im2 = np.pad(im, ((32, 32), (0, 0)))
-    fname = os.path.join(save_to, os.path.split(path_to_img)[1])
-    cv2.imwrite(fname, im2)
+    cv2.imwrite(data[1], im2)
 
 
 # generates the data
@@ -660,20 +659,48 @@ def gen_data(run, logger: logging.Logger):
         generate(run, target_dir, method)
 
     if is_for_stylegan:
+        model_param = run["model"]
+        weighted_sampling = model_param["weight_samples"] if "weight_samples" in model_param else False
+
         src_dir = target_dir
-        target_zip = target_dir + ".zip"
+        if weighted_sampling:
+            target_zip = target_dir + "_ws.zip"
+        else:
+            target_zip = target_dir + ".zip"
         if os.path.exists(target_zip):
             logger.info("Data is already converted to StyleGAN")
             return
+        with open(os.path.join(src_dir, "info_dict.json")) as f:
+            info = json.load(f)
         # Images need to be padded to 128x128
         src_dir_squared = src_dir + "_squared"
+        if weighted_sampling:
+            src_dir_squared += "_ws"
         if not os.path.exists(src_dir_squared):
             os.makedirs(src_dir_squared)
-            os.makedirs(os.path.join(src_dir_squared, "1"))
+            tail = os.path.join(src_dir_squared, "1")
+            os.makedirs(tail)
             files = glob.glob(os.path.join(src_dir, "1", "*"))
+            if weighted_sampling:
+                data = []
+                for f in files:
+                    head = os.path.split(f)[1]
+                    c = info[head][2]+1
+                    if c == 3:
+                        c = 4
+                    elif c == 4:
+                        c = 6
+                    elif c == 5:
+                        c = 12
+                    for i in range(c):
+                        data.append((f, os.path.join(tail, head[:-4] + "_" + str(i) + head[-4:])))
+                run["dataroot"] = target_dir + "_ws"
+            else:
+                data = [(files[i], os.path.join(tail, os.path.split(files[i])[1])) for i in range(len(files))]
+
             pool = mp.Pool(mp.cpu_count())
-            partial_process_item = partial(pad_image, save_to=os.path.join(src_dir_squared, "1"))
-            pool.map(partial_process_item, files)
+            partial_process_item = partial(pad_image)
+            pool.map(partial_process_item, data)
 
             pool.close()
             pool.join()

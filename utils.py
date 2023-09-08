@@ -268,13 +268,20 @@ def main():
     # show_modified_histograms(os.path.join("Data", "Bonn_128_5_rect_w10_s"))
     # show_hist_for_dict(os.path.join("Data", "Bonn_128_5_rect_w10_s (copy)", "info_dict.json"))
     # show_modified_histograms(os.path.join("Data", "Bonn_128_5_rect_w11_s"))
-    num = 250
+
+    num = 500
     folders = ["Bonn_128_5_rect_w20_s_aug_bce_ws_results_GAN_100epochs_20nz",
                "Bonn_128_5_rect_w20_m_aug_bce_ws_results_GAN_100epochs_20nz",
                "Bonn_128_5_rect_w20_s_aug_bce_results_GAN_100epochs_20nz",
                "Bonn_128_5_rect_w20_m_aug_bce_results_GAN_100epochs_20nz",
                "Bonn_128_5_rect_w10_s_aug_results_StyleGAN2_2000epochs",
                "Bonn_128_5_rect_w10_m_aug_results_StyleGAN2_2000epochs"]
+
+    folders = ["Bonn_128_5_rect_w20_m_aug_results_StyleGAN2_1000epochs",
+               "Bonn_128_5_rect_w20_m_aug_ws_results_StyleGAN2_1000epochs",
+               "Bonn_128_5_rect_w20_s_aug_results_StyleGAN2_1000epochs",
+               "Bonn_128_5_rect_w20_s_aug_ws_results_StyleGAN2_1000epochs"]
+    folders = ["Bonn_128_5_rect_w20_s_aug_ws_results_StyleGAN2_1000epochs"]
     for folder in folders:
         gen_drusen(folder, num)
 

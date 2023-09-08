@@ -128,11 +128,98 @@ def show_20drusen_for_one_path(data):
     images[0].save(fname, save_all=True, append_images=images[1:], optimize=False, duration=125, loop=0)
 
 
+def get_category(drusen_dir):
+    return os.path.split(drusen_dir)[1].split('_')[0]
+
+
+def show_10drusen_for_5paths(data):
+    folder = data[1]
+    drusen_dirs = data[2]
+    path_indices = data[3]
+    nrow = len(path_indices)+1
+    ncol = len(drusen_dirs)
+
+    def animation_function(path_image_i):
+        fig, axes = plt.subplots(nrow, ncol, figsize=(ncol*2, nrow*2))
+        categories = [get_category(d) for d in drusen_dirs]
+        for i in range(ncol):
+            drusen_dir = drusen_dirs[i]
+            for j in range(nrow):
+                ax = axes[j][i]
+                ax.axis('off')
+
+                if j == 0:  # Original Druse
+                    if i == 0 or categories[i] != categories[i-1]:  # Set title for first or changing
+                        ax.set_title(categories[i])
+                    druse = os.path.join(drusen_dir, "original_image.jpg")
+                    image = mpimg.imread(druse)
+                    ax.imshow(image, cmap='gray')
+                else:  # Path Image
+                    files = sorted(glob.glob(os.path.join(drusen_dir, "paths_images", f"path_{path_indices[j-1]:03d}", "*.jpg")))
+                    druse_path = files[path_image_i]
+                    image = mpimg.imread(druse_path)
+                    if i == 0:
+                        ax.set_title(f"Path {path_indices[j-1]}")
+                    ax.imshow(image, cmap='gray')
+
+        plt.tight_layout()
+        return fig2image(fig)
+
+    images = []
+    for i in range(33):
+        images.append(animation_function(i))
+    #anim_created = FuncAnimation(fig, animation_function, frames=33, interval=125)
+
+    #fname = os.path.join(folder, f"Drusen_{data[4]} Paths_{path_indices}.gif")
+    fname = os.path.join(folder, f"Paths {', '.join([str(x) for x in path_indices])}.gif")
+    #anim_created.save(os.path.join(folder, fname), writer='imagemagick', fps=8)
+    images[0].save(fname, save_all=True, append_images=images[1:], optimize=False, duration=125, loop=0)
+
+
+
 def generate_gif(data):
     if data[0] == 1:
         show_20drusen_for_one_path(data)
     elif data[0] == 2:
         show_10paths_for_5drusen(data)
+    elif data[0] == 3:
+        show_10drusen_for_5paths(data)
+
+
+def generate_gifs_int(folder, drusen_dir, paths):
+    drusen_all = sorted([os.path.join(drusen_dir[0], x) for x in glob.glob1(drusen_dir[0], "*")])
+    drusen = []
+    categories = ["Reticular Pseudo Drusen", "Drusenoid PED", "Small hard Drusen", "Large soft Drusen", "Other"]
+    for c in categories:
+        for d in drusen_all:
+            if c == os.path.split(d)[1].split('_')[0]:
+                drusen.append(d)
+    drusen_count = len(drusen)
+    if drusen_count == 0:
+        return
+    drusen = np.asarray(drusen)
+
+    directions = len(glob.glob1(os.path.join(drusen_all[0], "paths_images"), "path_*"))
+    if len(paths) == 0:  # take all
+        paths = [i for i in range(directions)]
+    path_count = len(paths)
+    paths = np.asarray(paths)
+
+    data = []
+    folder = os.path.join(folder, "interesting_gifs")
+    os.makedirs(folder, exist_ok=True)
+    for i in range(0, drusen_count, drusen_count):
+        ind_drusen = [j for j in range(i, min(i+drusen_count, drusen_count), 1)]
+        for j in range(0, len(paths), 5):
+            ind_paths = [k for k in range(j, min(j+5, path_count), 1)]
+            data.append((3, folder, drusen[ind_drusen], paths[ind_paths], i // 10, j // 5))
+
+    pool = mp.Pool(mp.cpu_count())
+    partial_process_item = partial(generate_gif)
+    pool.map(partial_process_item, data)
+    pool.close()
+    pool.join()
+    return
 
 
 def generate_gifs(folder, drusen_dir):
@@ -176,14 +263,20 @@ def generate_gifs_warp(folder):
     generate_gifs(folder, drusen_dir)
 
 
+def generate_gifs_warp_int(folder, paths):
+    drusen_dirs = glob.glob(os.path.join(folder, "experiments", "complete", "*", "results", "*"))
+    for drusen_dir in drusen_dirs:
+        generate_gifs_int(folder, glob.glob(os.path.join(drusen_dir, "*")), paths)
+
+
 def generate_gifs_linear(folder):
     drusen_dir = [os.path.join(folder, "paths")]
     generate_gifs(folder, drusen_dir)
 
 
-def show_all_drusen(folder):
-    files = glob.glob(os.path.join(folder, "*"))
-    #data = [[files[i:i+50] for i in range()]]
+def generate_gifs_linear_int(folder, paths):
+    drusen_dir = [os.path.join(folder, "interesting_paths")]
+    generate_gifs_int(folder, drusen_dir, paths)
 
 
 def analyze_latent_codes(image_in_path_i = -1, path_i = 0):
@@ -228,7 +321,9 @@ def main():
     #generate_gifs_linear(folder)
     #show_all_drusen(os.path.join("Data", "Bonn_128_5_rect_w05", "1"))
     #generate_gifs_warp(folder)
-    analyze_latent_codes()
+    #analyze_latent_codes()
+    generate_gifs_warp_int(os.path.join("Data", "Bonn_128_5_rect_w20_s_aug_bce_ws_results_GAN_100epochs_20nz_warp100000_20"), [])
+    generate_gifs_warp_int(os.path.join("Data", "Bonn_128_5_rect_w20_s_aug_bce_ws_results_GAN_100epochs_20nz_warp100000_20"), [1,4,5,9,12])
 
 
 if __name__ == "__main__":

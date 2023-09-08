@@ -29,7 +29,7 @@ from torchvision.transforms import ToPILImage
 from torchvision.utils import make_grid
 from tqdm import tqdm, tqdm_notebook
 import subprocess
-from visualization import generate_gifs_warp, generate_gifs_linear
+from visualization import generate_gifs_warp, generate_gifs_linear, generate_gifs_warp_int, generate_gifs_linear_int
 
 
 def map_for_stylegan(input):
@@ -63,22 +63,29 @@ class StyleGAN2Wrapper(nn.Module):
         Args:
             z (torch.Tensor)     : Batch of latent codes in Z-space
             shift (torch.Tensor) : Batch of shift vectors in Z- or W-space (based on self.shift_in_w_space)
-            latent_is_w (bool)   : Input latent code (denoted by z here) is in W-space
 
         Returns:
             I (torch.Tensor)     : Output images of size [batch_size, 3, resolution, resolution]
         """
         # The given latent codes lie on Z- or W-space, while the given shifts lie on the W-space
+        if shift is not None and len(shift.shape) == 4:
+            shift = shift.squeeze(3).squeeze(2)
         if self.shift_in_w_space:
             #if latent_is_w:
                 # Input latent code is in W-space
             # Input latent code is in Z-space -- get w code first
+            #print(z.shape)
             w = map_for_stylegan(self.G.mapping(z, None, truncation_psi=0.5, truncation_cutoff=8))
             w = w if shift is None else w + shift
-            # print(w.shape)
+            #print(w.shape)
             w = w.unsqueeze(dim=1).repeat(1, self.G.num_ws, 1)
-            # print(w.shape)
+            #if w.shape[0] > 8:
+            #    out = torch.cat([self.G.synthesis(w[i:min(i+8, w.shape[0])], noise_mode='const', force_fp32=True) for i in range(0,w.shape[0], 8)])
+            #else:
+            #    out = self.G.synthesis(w, noise_mode='const', force_fp32=True)
             out = self.G.synthesis(w, noise_mode='const', force_fp32=True)
+            #print(self.G.training)
+            #print(self.G.synthesis.training)
             out = torch.index_select(out, 1, torch.tensor([0]).cuda())
             #else:
                 # Input latent code is in Z-space -- get w code first
@@ -91,7 +98,7 @@ class StyleGAN2Wrapper(nn.Module):
 
 
 # Big chunks of this code are taken from GANLatentDiscovery
-def find_latent_linear(run, G, out_dir, logger: logging.Logger):
+def find_latent_linear(run, G, out_dir, model_folder, logger: logging.Logger):
     latent_method = run["latent_method"]
     steps = latent_method["latent_steps"]
     deformator_type = latent_method["deformator_type"]
@@ -115,8 +122,8 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
 
     G.eval()
 
-    def feed_G(G, input):
-        return G(torch.squeeze(input, (2, 3))) if is_style_gan else G(input)
+    def feed_G(G, input, shift=None):
+        return G(torch.squeeze(input, (2, 3)), shift) if is_style_gan else G(input)
 
     # custom weights initialization called on netG and netD
     def weights_init(m):
@@ -711,7 +718,6 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
         params.setup(n_steps=n_steps)
         return params
 
-
     class Trainer(object):
         def __init__(self, params=Params(), out_dir='', verbose=False):
             if verbose:
@@ -952,10 +958,13 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
         trainer.train(G, deformator, shift_predictor, multi_gpu=False)
 
         #save_results_charts(G, deformator, params, trainer.log_dir)
-        return
+        return deformator
 
-    def save_drusen_image(t, i, path_dir, path_i, step_i):
-        folder = os.path.join(path_dir, f"Druse_{i:03d}")
+    def save_drusen_image(t, i, path_dir, path_i, step_i, inter_name=""):
+        if inter_name:
+            folder = os.path.join(path_dir, f"{inter_name}")
+        else:
+            folder = os.path.join(path_dir, f"Druse_{i:03d}")
         if path_i < 0:
             fname = os.path.join(folder, "original_image.jpg")
         else:
@@ -963,14 +972,14 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
         im = to_image(t[i], True)
         im.save(fname)
 
-    def generate_path_images(G, folder):
+    def generate_path_images(G, folder, deformator):
         path_dir = os.path.join(folder, "paths")
         if os.path.exists(path_dir):  # skip if this already exists
             return
         os.makedirs(path_dir)
 
         # Sample G for drusen and generate all relevant paths and save the drusen
-        num_drusen = 20
+        num_drusen = latent_method["num_samples"]
         num_paths = directions
         drusen_folders = [os.path.join(path_dir, f"Druse_{i:03d}") for i in range(num_drusen)]
         for df in drusen_folders:
@@ -987,10 +996,71 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
             torch.save(z[i].cpu(), os.path.join(path_dir, f"Druse_{i:03d}", 'latent_code_image.pt'))
 
         # Load deformator
+        deformator.eval()
+
+        # Setup params, n_steps does not matter here
+        params = setup_params(deformator, 100000)
+        shifts_r = 2 * params.shift_scale
+        shifts_count = 16
+
+        latent_codes = torch.zeros((num_drusen, num_paths, 33, nz))
+
+        # Create images:
+        for dim in range(num_paths):
+            i = 0
+            for shift in np.arange(-shifts_r, shifts_r + 1e-9, shifts_r / shifts_count):
+                latent_shift = deformator(one_hot(deformator.input_dim, shift, dim).cuda())
+                latent_shift = latent_shift.unsqueeze(2).unsqueeze(3)
+                z_shifted = z + latent_shift
+
+                result = feed_G(G, z, latent_shift).cpu()
+                for j in range(num_drusen):
+                    latent_codes[j, dim, i] = z_shifted[j].squeeze()
+                    save_drusen_image(result, j, path_dir, dim, i)
+                i += 1
+        for i in range(num_drusen):
+            torch.save(latent_codes[i], os.path.join(path_dir, f"Druse_{i:03d}", 'paths_latent_codes.pt'))
+
+        return
+
+    def generate_interesting_path_images(G, folder, model_dir):
+        path_dir = os.path.join(folder, "interesting_paths")
+        if os.path.exists(path_dir):  # delete if this already exists
+            shutil.rmtree(path_dir, ignore_errors=True)
+        os.makedirs(path_dir, exist_ok=True)
+
+        folders = glob.glob(os.path.join(model_dir, "interesting_drusen", "*"))
+        drusen = []
+        latent_codes = []
+        for f in folders:
+            df = glob.glob(os.path.join(f, "*.jpg"))
+            nums = [int(os.path.split(x)[1].split('.')[0].split('_')[-1]) for x in df]
+            for n in nums:
+                drusen.append((n, os.path.split(f)[1]))
+                latent_codes.append(torch.load(os.path.join(f, f"latent_code_{n}.pt")).unsqueeze_(0))
+        z = torch.cat(latent_codes).cuda()
+        z = z.unsqueeze(2).unsqueeze(3)
+
+        num_drusen = len(drusen)
+        num_paths = directions
+        drusen_folders = [os.path.join(path_dir, f"{drusen[i][1]}_{drusen[i][0]}") for i in range(num_drusen)]
+        for df in drusen_folders:
+            os.makedirs(df)
+            paths_dir = os.path.join(df, "paths_images")
+            os.makedirs(paths_dir)
+            for i in range(num_paths):
+                os.makedirs(os.path.join(paths_dir, f"path_{i:03d}"))
+
+        for i in range(num_drusen):
+            shutil.copy(os.path.join(model_dir, "interesting_drusen", drusen[i][1], f"image_{drusen[i][0]}.jpg"),
+                        os.path.join(path_dir, f"{drusen[i][1]}_{drusen[i][0]}", "original_image.jpg"))
+
+        # Load deformator
         deformator = get_deformator(deformator_type=deformator_type, shift_dim=nz, input_dim=directions)
         deformator.cuda()
         deformator_paths = glob.glob(os.path.join(folder, "models", "deformator_*.pt"))
-        nums = np.asarray([int(os.path.split(x)[-1].split("_")[1].split(".")[0]) for x in deformator_paths], dtype=int)
+        nums = np.asarray([int(os.path.split(x)[-1].split("_")[1].split(".")[0]) for x in deformator_paths],
+                          dtype=int)
         deformator_path = deformator_paths[np.argmax(nums)]
         deformator.load_state_dict(torch.load(deformator_path))
         deformator.eval()
@@ -1009,25 +1079,29 @@ def find_latent_linear(run, G, out_dir, logger: logging.Logger):
                 latent_shift = deformator(one_hot(deformator.input_dim, shift, dim).cuda())
                 latent_shift = latent_shift.unsqueeze(2).unsqueeze(3)
                 z_shifted = z + latent_shift
-                result = feed_G(G, z_shifted).cpu()
+
+                result = feed_G(G, z, latent_shift).cpu()
                 for j in range(num_drusen):
                     latent_codes[j, dim, i] = z_shifted[j].squeeze()
-                    save_drusen_image(result, j, path_dir, dim, i)
+                    save_drusen_image(result, j, path_dir, dim, i, inter_name=f"{drusen[j][1]}_{drusen[j][0]}")
                 i += 1
         for i in range(num_drusen):
-            torch.save(latent_codes[i], os.path.join(path_dir, f"Druse_{i:03d}", 'paths_latent_codes.pt'))
+            torch.save(latent_codes[i], os.path.join(path_dir, f"{drusen[i][1]}_{drusen[i][0]}", 'paths_latent_codes.pt'))
 
         return
 
-    train_gan_latent_space(G, deformator_type, out_dir=out_dir, n_steps=steps)
-    generate_path_images(G, out_dir)
-    generate_gifs_linear(out_dir)
+    if "paths" in run:
+        generate_interesting_path_images(G, out_dir, model_folder)
+        generate_gifs_linear_int(out_dir, run["paths"])
+    else:
+        d = train_gan_latent_space(G, deformator_type, out_dir=out_dir, n_steps=steps)
+        generate_path_images(G, out_dir, d)
+        generate_gifs_linear(out_dir)
 
     return
 
 
 def find_latent_warp(run, out_dir, model_folder, logger: logging.Logger):
-
     if os.path.exists(os.path.join(out_dir, "experiments")):
         logger.info("exists")
     warp_folder = "WarpedGANSpace"
@@ -1037,6 +1111,7 @@ def find_latent_warp(run, out_dir, model_folder, logger: logging.Logger):
     is_stylegan = model in ["StyleGAN2", "StyleGAN3"]
     directions = latent_method["directions"]
     shift_in_w_space = latent_method["shift_in_w_space"] if "shift_in_w_space" in latent_method else False
+    show_int_paths = "paths" in run
 
     # Delete old data
     shutil.rmtree("experiments", ignore_errors=True)
@@ -1072,11 +1147,13 @@ def find_latent_warp(run, out_dir, model_folder, logger: logging.Logger):
         if shift_in_w_space:
             cmd += ["--shift-in-w-space"]
         cmd += ["--stylegan2-resolution=128"]
-    subprocess.run(cmd)
-    logger.info("Finished discovering directions")
+
+    if not show_int_paths:
+        subprocess.run(cmd)
+        logger.info("Finished discovering directions")
 
     # Create sample images
-    num_samples = 100
+    num_samples = latent_method["num_samples"]
     cmd = ["python",
            os.path.join(warp_folder, "sample_gan.py"),
            f"--gan-type={gan_type}",
@@ -1085,8 +1162,9 @@ def find_latent_warp(run, out_dir, model_folder, logger: logging.Logger):
         if shift_in_w_space:
             cmd += ["--shift-in-w-space"]
         cmd += ["--stylegan2-resolution=128"]
-    subprocess.run(cmd)
-    logger.info("Finished creating samples")
+    if not show_int_paths:
+        subprocess.run(cmd)
+        logger.info("Finished creating samples")
 
     # Show paths
     exp_folder = f"{gan_type}"
@@ -1095,7 +1173,26 @@ def find_latent_warp(run, out_dir, model_folder, logger: logging.Logger):
         exp_folder += "-W" if shift_in_w_space else "-Z"
     exp_folder += f"-LeNet-K{num_support_sets}-D{num_support_dipoles}-LearnGammas-eps{eps_min}_{eps_max}"
     exp_folder = os.path.join("experiments", "complete", exp_folder)
+
     pool_folder = f"{gan_type}_{num_samples}"
+    if show_int_paths:
+        path_to_pool = os.path.join(out_dir, "experiments", "latent_codes", gan_type, pool_folder)
+        shutil.rmtree(path_to_pool, ignore_errors=True)
+        os.makedirs(path_to_pool, exist_ok=True)
+
+        # do the generation of how the folder should look like: folder for each druse, with image.jpg, with latent_code.pt
+        model_int_folder = os.path.join(model_folder, "interesting_drusen")
+        for folder in glob.glob(os.path.join(model_int_folder, "*")):
+            name = os.path.split(folder)[1]
+            for druse in glob.glob(os.path.join(folder, "*.jpg")):
+                drusen_id = int(os.path.split(druse)[1].split('_')[-1].split('.')[0])
+                path_to_druse = os.path.join(path_to_pool, f"{name}_{drusen_id}")
+                os.makedirs(path_to_druse, exist_ok=True)
+                shutil.copy(druse, os.path.join(path_to_druse, "image.jpg"))
+                d = torch.load(os.path.join(folder, f"latent_code_{drusen_id}.pt")).unsqueeze(0)
+                torch.save(d, os.path.join(path_to_druse, "latent_code.pt"))
+
+        shutil.move(os.path.join(out_dir, "experiments"), os.getcwd())
     cmd = ["python",
            os.path.join(warp_folder, "traverse_latent_space.py"),
            f"--exp={exp_folder}",
@@ -1108,7 +1205,10 @@ def find_latent_warp(run, out_dir, model_folder, logger: logging.Logger):
     logger.info("Finished moving data")
 
     # Create better plots
-    generate_gifs_warp(out_dir)
+    if show_int_paths:
+        generate_gifs_warp_int(out_dir, run["paths"])
+    else:
+        generate_gifs_warp(out_dir)
     logger.info("Finished creating plots")
 
 
@@ -1122,6 +1222,7 @@ def find_latent_pde(run, out_dir, model_folder, logger: logging.Logger):
     is_stylegan = model in ["StyleGAN2", "StyleGAN3"]
     directions = latent_method["directions"]
     shift_in_w_space = latent_method["shift_in_w_space"] if "shift_in_w_space" in latent_method else False
+    show_int_paths = "paths" in run
 
     # Delete old data
     shutil.rmtree("experiments", ignore_errors=True)
@@ -1153,11 +1254,13 @@ def find_latent_pde(run, out_dir, model_folder, logger: logging.Logger):
         if shift_in_w_space:
             cmd += ["--shift-in-w-space"]
         cmd += ["--stylegan2-resolution=128"]
-    subprocess.run(cmd)
-    logger.info("Finished discovering directions")
+
+    if not show_int_paths:
+        subprocess.run(cmd)
+        logger.info("Finished discovering directions")
 
     # Create sample images
-    num_samples = 100
+    num_samples = latent_method["num_samples"]
     cmd = ["python",
            os.path.join(pde_folder, "sample_gan.py"),
            f"--gan-type={gan_type}",
@@ -1166,8 +1269,9 @@ def find_latent_pde(run, out_dir, model_folder, logger: logging.Logger):
         if shift_in_w_space:
             cmd += ["--shift-in-w-space"]
         cmd += ["--stylegan2-resolution=128"]
-    subprocess.run(cmd)
-    logger.info("Finished creating samples")
+    if not show_int_paths:
+        subprocess.run(cmd)
+        logger.info("Finished creating samples")
 
     # Show paths
     exp_folder = f"{gan_type}"
@@ -1176,7 +1280,26 @@ def find_latent_pde(run, out_dir, model_folder, logger: logging.Logger):
         exp_folder += "-W" if shift_in_w_space else "-Z"
     exp_folder += f"-LeNet-K{num_support_sets}-D{num_support_timesteps}"
     exp_folder = os.path.join("experiments", "complete", exp_folder)
+
     pool_folder = f"{gan_type}_{num_samples}"
+    if show_int_paths:
+        path_to_pool = os.path.join(out_dir, "experiments", "latent_codes", gan_type, pool_folder)
+        shutil.rmtree(path_to_pool, ignore_errors=True)
+        os.makedirs(path_to_pool, exist_ok=True)
+
+        # do the generation of how the folder should look like: folder for each druse, with image.jpg, with latent_code.pt
+        model_int_folder = os.path.join(model_folder, "interesting_drusen")
+        for folder in glob.glob(os.path.join(model_int_folder, "*")):
+            name = os.path.split(folder)[1]
+            for druse in glob.glob(os.path.join(folder, "*.jpg")):
+                drusen_id = int(os.path.split(druse)[1].split('_')[-1].split('.')[0])
+                path_to_druse = os.path.join(path_to_pool, f"{name}_{drusen_id}")
+                os.makedirs(path_to_druse, exist_ok=True)
+                shutil.copy(druse, os.path.join(path_to_druse, "image.jpg"))
+                d = torch.load(os.path.join(folder, f"latent_code_{drusen_id}.pt")).unsqueeze(0)
+                torch.save(d, os.path.join(path_to_druse, "latent_code.pt"))
+
+        shutil.move(os.path.join(out_dir, "experiments"), os.getcwd())
     cmd = ["python",
            os.path.join(pde_folder, "traverse_latent_space_twosides.py"),
            f"--exp={exp_folder}",
@@ -1190,7 +1313,10 @@ def find_latent_pde(run, out_dir, model_folder, logger: logging.Logger):
     logger.info("Finished moving data")
 
     # Create better plots
-    generate_gifs_warp(out_dir)
+    if show_int_paths:
+        generate_gifs_warp_int(out_dir, run["paths"])
+    else:
+        generate_gifs_warp(out_dir)
     logger.info("Finished creating plots")
 
 
@@ -1235,12 +1361,13 @@ def find_latent(run, G, out_dir, logger: logging.Logger):
 
     if already_trained:
         logger.info("Already discovered directions")
-    elif method == "linear":
-        find_latent_linear(run, G, out_dir, logger)
-    elif method == "warp":
-        find_latent_warp(run, out_dir, model_folder, logger)
-    elif method == "pde":
-        find_latent_pde(run, out_dir, model_folder, logger)
+    if not already_trained or "paths" in run:
+        if method == "linear":
+            find_latent_linear(run, G, out_dir, model_folder, logger)
+        elif method == "warp":
+            find_latent_warp(run, out_dir, model_folder, logger)
+        elif method == "pde":
+            find_latent_pde(run, out_dir, model_folder, logger)
     logger.info("Finished discovering directions")
     close_logger()
     return

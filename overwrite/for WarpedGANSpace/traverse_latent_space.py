@@ -496,6 +496,9 @@ def main():
         #   paths_latent_codes : torch.Size([num_gen_paths, 2 * args.shift_steps + 1, G.dim_z])
         torch.save(torch.cat(paths_latent_codes), osp.join(latent_code_dir, 'paths_latent_codes.pt'))
 
+        # Save z latent code
+        torch.save(z_.cpu(), osp.join(latent_code_dir, 'z_code.pt'))
+
         if args.verbose:
             update_stdout(1)
             print()
