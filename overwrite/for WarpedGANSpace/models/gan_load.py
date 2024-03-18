@@ -153,7 +153,7 @@ class StyleGAN2Wrapper(nn.Module):
             w (torch.Tensor) : W-space latent code of size [batch_size, 512]
 
         """
-        return map(self.G.mapping(z, None, truncation_psi=0.5, truncation_cutoff=8))
+        return map(self.G.mapping(z, None))
 
     def forward(self, z, shift=None, latent_is_w=False):
         """StyleGAN2 generator forward function.
@@ -175,7 +175,7 @@ class StyleGAN2Wrapper(nn.Module):
                 w = z if shift is None else z + shift
             else:
                 # Input latent code is in Z-space -- get w code first
-                w = map(self.G.mapping(z, None, truncation_psi=0.5, truncation_cutoff=8))
+                w = map(self.G.mapping(z, None))
                 w = w if shift is None else w + shift
             # print(w.shape)
             w = w.unsqueeze(dim=1).repeat(1, self.G.num_ws, 1)

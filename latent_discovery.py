@@ -123,7 +123,7 @@ def find_latent_linear(run, G, out_dir, model_folder, logger: logging.Logger):
     G.eval()
 
     def feed_G(G, input, shift=None):
-        return G(torch.squeeze(input, (2, 3)), shift) if is_style_gan else G(input)
+        return G(torch.squeeze(input, (2, 3)), shift) if is_style_gan else G(input if shift is None else input+shift)
 
     # custom weights initialization called on netG and netD
     def weights_init(m):
@@ -969,7 +969,7 @@ def find_latent_linear(run, G, out_dir, model_folder, logger: logging.Logger):
             fname = os.path.join(folder, "original_image.jpg")
         else:
             fname = os.path.join(folder, "paths_images", f"path_{path_i:03d}", f"{step_i:06d}.jpg")
-        im = to_image(t[i], True)
+        im = to_image(t, True)
         im.save(fname)
 
     def generate_path_images(G, folder, deformator):
@@ -992,7 +992,7 @@ def find_latent_linear(run, G, out_dir, model_folder, logger: logging.Logger):
         z = make_noise(num_drusen, nz)
         drusen = feed_G(G, z)
         for i in range(num_drusen):
-            save_drusen_image(drusen, i, path_dir, -1, -1)
+            save_drusen_image(drusen[i], i, path_dir, -1, -1)
             torch.save(z[i].cpu(), os.path.join(path_dir, f"Druse_{i:03d}", 'latent_code_image.pt'))
 
         # Load deformator
@@ -1003,7 +1003,7 @@ def find_latent_linear(run, G, out_dir, model_folder, logger: logging.Logger):
         shifts_r = 2 * params.shift_scale
         shifts_count = 16
 
-        latent_codes = torch.zeros((num_drusen, num_paths, 33, nz))
+        latent_codes = [torch.zeros((num_paths, 33, nz)).cuda() for _ in range(num_drusen)]
 
         # Create images:
         for dim in range(num_paths):
@@ -1015,9 +1015,10 @@ def find_latent_linear(run, G, out_dir, model_folder, logger: logging.Logger):
 
                 result = feed_G(G, z, latent_shift).cpu()
                 for j in range(num_drusen):
-                    latent_codes[j, dim, i] = z_shifted[j].squeeze()
-                    save_drusen_image(result, j, path_dir, dim, i)
+                    latent_codes[j][dim, i] = z_shifted[j].squeeze()
+                    save_drusen_image(result[j], j, path_dir, dim, i)
                 i += 1
+
         for i in range(num_drusen):
             torch.save(latent_codes[i], os.path.join(path_dir, f"Druse_{i:03d}", 'paths_latent_codes.pt'))
 
@@ -1070,7 +1071,7 @@ def find_latent_linear(run, G, out_dir, model_folder, logger: logging.Logger):
         shifts_r = 2 * params.shift_scale
         shifts_count = 16
 
-        latent_codes = torch.zeros((num_drusen, num_paths, 33, nz))
+        latent_codes = [torch.zeros((num_paths, 33, nz)).cuda() for _ in range(num_drusen)]
 
         # Create images:
         for dim in range(num_paths):
@@ -1082,8 +1083,8 @@ def find_latent_linear(run, G, out_dir, model_folder, logger: logging.Logger):
 
                 result = feed_G(G, z, latent_shift).cpu()
                 for j in range(num_drusen):
-                    latent_codes[j, dim, i] = z_shifted[j].squeeze()
-                    save_drusen_image(result, j, path_dir, dim, i, inter_name=f"{drusen[j][1]}_{drusen[j][0]}")
+                    latent_codes[j][dim, i] = z_shifted[j].squeeze()
+                    save_drusen_image(result[j], j, path_dir, dim, i, inter_name=f"{drusen[j][1]}_{drusen[j][0]}")
                 i += 1
         for i in range(num_drusen):
             torch.save(latent_codes[i], os.path.join(path_dir, f"{drusen[i][1]}_{drusen[i][0]}", 'paths_latent_codes.pt'))
@@ -1361,7 +1362,7 @@ def find_latent(run, G, out_dir, logger: logging.Logger):
 
     if already_trained:
         logger.info("Already discovered directions")
-    if not already_trained or "paths" in run:
+    if not already_trained or "paths" in run:  # either not trained already, or run["paths"] is not empty
         if method == "linear":
             find_latent_linear(run, G, out_dir, model_folder, logger)
         elif method == "warp":

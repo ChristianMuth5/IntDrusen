@@ -315,15 +315,16 @@ def show_5paths_for_5drusen(data):
 
 
 def main():
-    folder = os.path.join("Data", "Bonn_128_5_rect_w10_s_aug_bce_ws_results_GAN_200epochs_20nz_warp1000_20")
+    folder = os.path.join("Data", "Bonn_128_5_rect_w20_s_aug_results_StyleGAN2_1000epochs_linear4000_w_ortho")
     #generate_gifs_warp(folder)
     #folder = os.path.join("Data", "Bonn_128_5_rect_w10_s_aug_bce_c=hw_results_GAN_200epochs_20nz_linear10000_ortho")
     #generate_gifs_linear(folder)
     #show_all_drusen(os.path.join("Data", "Bonn_128_5_rect_w05", "1"))
     #generate_gifs_warp(folder)
     #analyze_latent_codes()
-    generate_gifs_warp_int(os.path.join("Data", "Bonn_128_5_rect_w20_s_aug_bce_ws_results_GAN_100epochs_20nz_warp100000_20"), [])
-    generate_gifs_warp_int(os.path.join("Data", "Bonn_128_5_rect_w20_s_aug_bce_ws_results_GAN_100epochs_20nz_warp100000_20"), [1,4,5,9,12])
+    #generate_gifs_warp_int(os.path.join("Data", "Bonn_128_5_rect_w20_s_aug_bce_ws_results_GAN_100epochs_20nz_warp100000_20"), [])
+    #generate_gifs_warp_int(os.path.join("Data", "Bonn_128_5_rect_w20_s_aug_bce_ws_results_GAN_100epochs_20nz_warp100000_20"), [1,4,5,9,12])
+    generate_gifs_linear(folder)
 
 
 if __name__ == "__main__":

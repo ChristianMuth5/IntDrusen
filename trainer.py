@@ -655,8 +655,9 @@ def train(run, logger: logging.Logger):
     if "drusen" in run and os.path.exists(drusen_dir):
         drusen = run["drusen"]
         int_drusen_dir = os.path.join(folder_out, "interesting_drusen")
-        shutil.rmtree(int_drusen_dir)
-        os.makedirs(int_drusen_dir)
+        if os.path.exists(int_drusen_dir):
+            shutil.rmtree(int_drusen_dir)
+            os.makedirs(int_drusen_dir)
         for i, name in [(0, "Reticular Pseudo Drusen"), (1, "Drusenoid PED"), (2, "Small hard Drusen"), (3, "Large soft Drusen"), (4, "Other")]:
             sub_dir = os.path.join(int_drusen_dir, name)
             os.makedirs(sub_dir)

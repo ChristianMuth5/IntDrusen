@@ -466,7 +466,8 @@ def main():
                 with torch.no_grad():
                     if args_json.__dict__["shift_in_w_space"]:
                         transformed_img.append(G(z=current_path_latent_codes_batches[t],
-                                                 shift=current_path_latent_shifts_batches[t]))
+                                                 shift=current_path_latent_shifts_batches[t],
+                                                 latent_is_w=True))
                     else:
                         transformed_img.append(G(z=current_path_latent_codes_batches[t],
                                                  shift=current_path_latent_shifts_batches[t]))

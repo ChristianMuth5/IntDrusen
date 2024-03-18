@@ -694,7 +694,7 @@ def gen_data(run, logger: logging.Logger):
                         c = 12
                     for i in range(c):
                         data.append((f, os.path.join(tail, head[:-4] + "_" + str(i) + head[-4:])))
-                run["dataroot"] = target_dir + "_ws"
+                #run["dataroot"] = target_dir + "_ws"
             else:
                 data = [(files[i], os.path.join(tail, os.path.split(files[i])[1])) for i in range(len(files))]
 
