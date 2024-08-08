@@ -1,3 +1,7 @@
+The Methodology.pdf contains background information on this project.
+
+To get this project to run:
+
 1) Create environment matching environment.yaml, it should contain everything for stylegan3, WarpedGANSpace, GANLatentDiscovery, PDETraversal (also needs kornia) and this project.
 
 2) Clone stylegan3 from https://github.com/NVlabs/stylegan3/tree/main into the folder "stylegan3".
